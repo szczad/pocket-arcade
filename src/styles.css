@@ -18,3 +18,4 @@ canvas.mine-board{touch-action:none;cursor:crosshair}
 .artillery-fire{margin-top:14px;min-width:120px;justify-content:center}
 .game-layout.expanded .artillery-fire{grid-column:2;justify-self:stretch}
 .game-layout.expanded{align-items:center}
+.legal-links{display:flex;flex-wrap:wrap;gap:16px}.legal-links button{background:none;border:0;padding:8px 0;color:var(--muted);text-decoration:underline;cursor:pointer}.legal-links button:hover{color:var(--accent)}.legal-dialog{width:min(700px,calc(100% - 32px));max-height:85vh;overflow:auto;background:var(--surface);color:var(--fg);border:2px solid var(--border);padding:24px;line-height:1.6}.legal-dialog::backdrop{background:#000b}.legal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.legal-head h1{font-size:clamp(22px,4vw,32px);margin:0}.legal-dialog h2{font-size:17px;margin-top:24px}.legal-dialog p{font-size:14px;color:var(--fg)}

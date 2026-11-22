@@ -5,6 +5,7 @@ import { createAccount, type Theme } from './account';
 import { ArcadeAudio } from './audio';
 import { achievements } from './achievements';
 import { getLanguage, onLanguageChange, setLanguage, t } from './i18n';
+import { setupLegal } from './legal';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 const games: { id: GameId; number: string; name: string; description: string; color: string; art: string }[] = [
@@ -338,5 +339,6 @@ function renderLanguage(): void {
   renderGameText();
 }
 onLanguageChange(renderLanguage);
+setupLegal(pauseGame);
 renderLanguage();
 navigate();
