@@ -2,6 +2,7 @@ import './styles.css';
 import { createGame, type Action, type Game, type GameId, type SnakeSpeed } from './games';
 import { createAccount, type Theme } from './account';
 import { ArcadeAudio } from './audio';
+import { getLanguage, onLanguageChange, setLanguage, t } from './i18n';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 const games: { id: GameId; number: string; name: string; description: string; color: string; art: string }[] = [
@@ -52,17 +53,28 @@ const updateLanes = () => { lanesCustomLabel.hidden = gameId !== 'frog-crossing'
 lanesSelect.addEventListener('change', updateLanes);
 lanesCustom.addEventListener('change', () => { lanesCustom.value = String(Math.max(1, Math.min(15, Math.round(Number(lanesCustom.value) || 1)))); updateLanes(); });
 const speedSelect = speedLabel.querySelector<HTMLSelectElement>('select')!;
+const languageLabel = document.createElement('label');
+languageLabel.className = 'setting-row';
+languageLabel.innerHTML = '<span><strong></strong><small></small></span><select aria-label="Language"><option value="en">English</option><option value="pl">Polski</option></select>';
+theme.closest('.setting-row')!.after(languageLabel);
+const languageSelect = languageLabel.querySelector<HTMLSelectElement>('select')!;
+languageSelect.value = getLanguage();
+languageSelect.onchange = () => setLanguage(languageSelect.value as 'en' | 'pl');
 speedSelect.addEventListener('change', () => { if (gameId && mode === 'ready') resetGame(); });
 let storageAvailable = true;
 try { const value = localStorage.getItem('pocket-arcade:audio'); if (value) { const saved = JSON.parse(value); music.checked = saved.music !== false; effects.checked = saved.effects !== false; } } catch { storageAvailable = false; }
 audio.music = music.checked; audio.effects = effects.checked;
-const saveAudio = () => { try { localStorage.setItem('pocket-arcade:audio', JSON.stringify({music: music.checked, effects: effects.checked})); } catch { storageAvailable = false; $('#storage-note').textContent = 'Device storage unavailable; preferences last for this session only.'; } };
+const saveAudio = () => { try { localStorage.setItem('pocket-arcade:audio', JSON.stringify({music: music.checked, effects: effects.checked})); } catch { storageAvailable = false; refreshAccountText(); } };
+let refreshAccountText = () => {};
 const account = createAccount($<HTMLElement>('#account'), state => {
   document.documentElement.dataset.theme = state.theme;
   theme.value = state.theme;
-  for (const g of games) $<HTMLElement>(`[data-best="${g.id}"]`).textContent = state.bests[g.id] === undefined ? 'Not played' : String(state.bests[g.id]);
-  $('#storage-note').textContent = state.sessionOnly || !storageAvailable ? 'Device storage unavailable; guest data and preferences last for this session only.' : '';
-  $<HTMLButtonElement>('#login').textContent = state.signedIn ? 'Player ↓' : 'Log in ↗';
+  refreshAccountText = () => {
+    for (const g of games) $<HTMLElement>(`[data-best="${g.id}"]`).textContent = state.bests[g.id] === undefined ? t('Not played', 'Jeszcze nie grano') : String(state.bests[g.id]);
+    $('#storage-note').textContent = state.sessionOnly || !storageAvailable ? t('Device storage unavailable; guest data and preferences last for this session only.', 'Pamięć urządzenia jest niedostępna; dane gościa i ustawienia zostaną zachowane tylko podczas tej sesji.') : '';
+    $<HTMLButtonElement>('#login').textContent = state.signedIn ? t('Player ↓', 'Gracz ↓') : t('Log in ↗', 'Zaloguj się ↗');
+  };
+  refreshAccountText();
 });
 $<HTMLButtonElement>('#login').onclick = () => { account.openLogin(); $('#account').scrollIntoView({behavior: 'smooth', block: 'start'}); };
 music.onchange = () => { audio.music = music.checked; if (!music.checked) audio.stopMusic(); else if (mode === 'playing') void audio.start(); saveAudio(); };
@@ -77,14 +89,14 @@ let frame = 0, last = 0, accumulator = 0, previousScore = 0;
 let simulationScale = 1;
 const held = new Set<Action>();
 function release(): void { for (const action of held) game?.input(action, false); held.clear(); document.querySelectorAll('.dpad button').forEach(b => b.classList.remove('pressed')); }
-function pauseGame(): void { if (mode !== 'playing') return; mode = 'paused'; cancelAnimationFrame(frame); audio.stop(); release(); boardMessage.hidden = false; $('#message-label').textContent = 'TAKE A BREATHER'; $('#message-title').textContent = 'Paused.'; start.innerHTML = 'RESUME <span>→</span>'; pauseButton.textContent = 'Resume'; }
-function begin(): void { if (!game || mode === 'playing') return; if (mode === 'ended') resetGame(); mode = 'playing'; boardMessage.hidden = true; pauseButton.disabled = false; pauseButton.textContent = 'Pause'; last = 0; accumulator = 0; void audio.start(); frame = requestAnimationFrame(tick); }
-function resetGame(): void { if (!gameId) return; cancelAnimationFrame(frame); audio.stop(); release(); const speed = speedSelect.value as SnakeSpeed; const mazeSize = mazeSelect.value === 'custom' ? Math.max(5, Math.min(50, Math.round(Number(customSize.value) || 5))) : Number(mazeSelect.value); const lanes = lanesSelect.value === 'custom' ? Math.max(1, Math.min(15, Math.round(Number(lanesCustom.value) || 1))) : Number(lanesSelect.value); game = createGame(gameId, speed, mazeSize, lanes); simulationScale = gameId === 'snake' ? 1 : { slow: 2 / 3, medium: 1, fast: 2 }[speed]; previousScore = 0; mode = 'ready'; $('#score').textContent = '0'; $('#message-label').textContent = 'READY, PLAYER?'; $('#message-title').textContent = "Let's play."; start.innerHTML = 'START GAME <span>→</span>'; boardMessage.hidden = false; pauseButton.disabled = true; pauseButton.textContent = 'Pause'; game.draw(ctx); }
-function tick(now: number): void { if (mode !== 'playing' || !game) return; if (!last) last = now; accumulator += Math.min(now - last, 250) * simulationScale; last = now; while (accumulator >= 1000 / 60 && game.status === 'playing') { game.step(); accumulator -= 1000 / 60; } if (game.score !== previousScore) { previousScore = game.score; $('#score').textContent = String(game.score); audio.cue(); } game.draw(ctx); if (game.status !== 'playing') { mode = 'ended'; release(); audio.stop(); audio.cue(true); pauseButton.disabled = true; $('#message-label').textContent = game.status === 'won' ? 'WELL PLAYED' : 'GAME OVER'; $('#message-title').textContent = game.status === 'won' ? 'You won!' : 'Nice run.'; start.innerHTML = 'PLAY AGAIN <span>→</span>'; boardMessage.hidden = false; if (gameId) account.record(gameId, game.score); return; } frame = requestAnimationFrame(tick); }
+function pauseGame(): void { if (mode !== 'playing') return; mode = 'paused'; cancelAnimationFrame(frame); audio.stop(); release(); boardMessage.hidden = false; renderGameText(); }
+function begin(): void { if (!game || mode === 'playing') return; if (mode === 'ended') resetGame(); mode = 'playing'; boardMessage.hidden = true; pauseButton.disabled = false; renderGameText(); last = 0; accumulator = 0; void audio.start(); frame = requestAnimationFrame(tick); }
+function resetGame(): void { if (!gameId) return; cancelAnimationFrame(frame); audio.stop(); release(); const speed = speedSelect.value as SnakeSpeed; const mazeSize = mazeSelect.value === 'custom' ? Math.max(5, Math.min(50, Math.round(Number(customSize.value) || 5))) : Number(mazeSelect.value); const lanes = lanesSelect.value === 'custom' ? Math.max(1, Math.min(15, Math.round(Number(lanesCustom.value) || 1))) : Number(lanesSelect.value); game = createGame(gameId, speed, mazeSize, lanes); simulationScale = gameId === 'snake' ? 1 : { slow: 2 / 3, medium: 1, fast: 2 }[speed]; previousScore = 0; mode = 'ready'; $('#score').textContent = '0'; boardMessage.hidden = false; pauseButton.disabled = true; renderGameText(); game.draw(ctx); }
+function tick(now: number): void { if (mode !== 'playing' || !game) return; if (!last) last = now; accumulator += Math.min(now - last, 250) * simulationScale; last = now; while (accumulator >= 1000 / 60 && game.status === 'playing') { game.step(); accumulator -= 1000 / 60; } if (game.score !== previousScore) { previousScore = game.score; $('#score').textContent = String(game.score); audio.cue(); } game.draw(ctx); if (game.status !== 'playing') { mode = 'ended'; release(); audio.stop(); audio.cue(true); pauseButton.disabled = true; boardMessage.hidden = false; renderGameText(); if (gameId) account.record(gameId, game.score); return; } frame = requestAnimationFrame(tick); }
 start.onclick = begin;
 pauseButton.onclick = () => mode === 'playing' ? pauseGame() : begin();
 $<HTMLButtonElement>('#replay').onclick = () => { resetGame(); begin(); };
-function navigate(): void { cancelAnimationFrame(frame); audio.stop(); release(); const id = location.hash.slice(6) as GameId; const selected = location.hash.startsWith('#game/') ? games.find(g => g.id === id) : undefined; gameId = selected?.id ?? null; picker.hidden = !!selected; gameView.hidden = !selected; if (selected) { $('#game-title').textContent = selected.name; $('#game-number').textContent = selected.number; $('#instructions').textContent = selected.id === 'snake' ? 'Collect fruit to grow. Avoid the walls and your own tail.' : selected.id === 'breakout' ? 'Move the paddle to keep the ball in play and clear every brick.' : selected.id === 'labyrinth' ? 'Find the gold exit. Fewer moves earn a higher score.' : selected.id === 'frog-crossing' ? 'Hop across the road, avoid traffic, and reach the river.' : 'Change lanes to avoid traffic. Every car you pass earns a point.'; resetGame(); } else { game = null; mode = 'ready'; } window.scrollTo(0, 0); }
+function navigate(): void { cancelAnimationFrame(frame); audio.stop(); release(); const id = location.hash.slice(6) as GameId; const selected = location.hash.startsWith('#game/') ? games.find(g => g.id === id) : undefined; gameId = selected?.id ?? null; picker.hidden = !!selected; gameView.hidden = !selected; if (selected) { $('#game-number').textContent = selected.number; resetGame(); } else { game = null; mode = 'ready'; } renderGameText(); window.scrollTo(0, 0); }
 window.addEventListener('hashchange', navigate);
 const keyActions: Record<string, Action> = { ArrowUp: 'up', w: 'up', ArrowDown: 'down', s: 'down', ArrowLeft: 'left', a: 'left', ArrowRight: 'right', d: 'right' };
 function keyAction(event: KeyboardEvent): Action | undefined { return keyActions[event.key] ?? keyActions[event.key.toLowerCase()]; }
@@ -94,4 +106,104 @@ window.addEventListener('keyup', event => { const action = keyAction(event); if 
 document.querySelectorAll<HTMLButtonElement>('[data-action]').forEach(button => { const action = button.dataset.action as Action; const end = () => { if (held.delete(action)) game?.input(action, false); button.classList.remove('pressed'); }; button.addEventListener('pointerdown', event => { if (mode !== 'playing') return; event.preventDefault(); button.setPointerCapture(event.pointerId); if (!held.has(action)) { held.add(action); game?.input(action, true); } button.classList.add('pressed'); }); button.addEventListener('pointerup', end); button.addEventListener('pointercancel', end); button.addEventListener('lostpointercapture', end); });
 window.addEventListener('blur', () => { pauseGame(); release(); });
 document.addEventListener('visibilitychange', () => { if (document.hidden) { pauseGame(); release(); } });
+const gameCopy: Record<GameId, { name: string; description: string; instructions: string }> = {
+  snake: { name: 'Wąż', description: 'Zbieraj owoce. Rośnij. Zachowaj czujność.', instructions: 'Zbieraj owoce, aby rosnąć. Unikaj ścian i własnego ogona.' },
+  breakout: { name: 'Breakout', description: 'Rozbij mur, cegła po cegle.', instructions: 'Poruszaj paletką, aby odbijać piłkę i rozbić wszystkie cegły.' },
+  'lane-dodger': { name: 'Unikaj pojazdów', description: 'Wybierz pas i omijaj pojazdy.', instructions: 'Zmieniaj pasy, aby unikać pojazdów. Za każdy ominięty samochód zdobywasz punkt.' },
+  labyrinth: { name: 'Labirynt', description: 'Znajdź drogę przez labirynt.', instructions: 'Znajdź złote wyjście. Mniej ruchów oznacza więcej punktów.' },
+  'frog-crossing': { name: 'Przeprawa żaby', description: 'Przeskocz przez drogę do rzeki.', instructions: 'Przeskocz przez drogę, unikaj pojazdów i dotrzyj do rzeki.' },
+};
+function gameName(id: GameId): string {
+  return t(games.find(g => g.id === id)!.name, gameCopy[id].name);
+}
+function renderGameText(): void {
+  if (gameId) {
+    $('#game-title').textContent = gameName(gameId);
+    const instructions: Record<GameId, string> = {
+      snake: 'Collect fruit to grow. Avoid the walls and your own tail.',
+      breakout: 'Move the paddle to keep the ball in play and clear every brick.',
+      'lane-dodger': 'Change lanes to avoid traffic. Every car you pass earns a point.',
+      labyrinth: 'Find the gold exit. Fewer moves earn a higher score.',
+      'frog-crossing': 'Hop across the road, avoid traffic, and reach the river.',
+    };
+    $('#instructions').textContent = t(instructions[gameId], gameCopy[gameId].instructions);
+  }
+  const won = game?.status === 'won';
+  $('#message-label').textContent = mode === 'paused' ? t('TAKE A BREATHER', 'CHWILA PRZERWY') : mode === 'ended' ? (won ? t('WELL PLAYED', 'DOBRA GRA') : t('GAME OVER', 'KONIEC GRY')) : t('READY, PLAYER?', 'GOTOWY DO GRY?');
+  $('#message-title').textContent = mode === 'paused' ? t('Paused.', 'Pauza.') : mode === 'ended' ? (won ? t('You won!', 'Wygrana!') : t('Nice run.', 'Dobra gra.')) : t("Let's play.", 'Zagrajmy.');
+  start.firstChild!.textContent = mode === 'paused' ? t('RESUME ', 'WZNÓW ') : mode === 'ended' ? t('PLAY AGAIN ', 'ZAGRAJ PONOWNIE ') : t('START GAME ', 'ROZPOCZNIJ GRĘ ');
+  pauseButton.textContent = mode === 'paused' ? t('Resume', 'Wznów') : t('Pause', 'Pauza');
+}
+function renderLanguage(): void {
+  languageSelect.value = getLanguage();
+  const text = (selector: string, en: string, pl: string) => { $(selector).textContent = t(en, pl); };
+  const attr = (selector: string, attribute: string, en: string, pl: string) => { $(selector).setAttribute(attribute, t(en, pl)); };
+  attr('.brand', 'aria-label', 'Pocket Arcade home', 'Pocket Arcade — strona główna');
+  document.querySelectorAll('.settings-open').forEach(button => { button.setAttribute('aria-label', t('Open settings', 'Otwórz ustawienia')); button.setAttribute('title', t('Settings', 'Ustawienia')); });
+  $<HTMLElement>('.hero .eyebrow').lastChild!.textContent = t(' YOUR LITTLE CORNER OF PLAY', ' TWÓJ MAŁY ZAKĄTEK GRY');
+  $('.intro').innerHTML = t('A little play goes a long way.<br>Pick a cartridge and beat your best.', 'Odrobina zabawy wiele zmienia.<br>Wybierz grę i pobij swój rekord.');
+  const stamp = document.querySelectorAll('.hero-stamp span');
+  stamp[0].textContent = t('INSERT', 'WRZUĆ'); stamp[1].textContent = t('JUST KIDDING ✳', 'ŻARTUJEMY ✳');
+  text('.hero-stamp strong', 'COIN', 'MONETĘ');
+  $<HTMLElement>('.section-heading .eyebrow').firstChild!.textContent = t('THE COLLECTION ', 'KOLEKCJA ');
+  text('.section-heading .subtle', '/ 05 GAMES', '/ 05 GIER');
+  text('.section-heading h2', 'Choose your game', 'Wybierz grę');
+  text('.section-note', 'GOOD GAMES, NO QUARTERS.', 'DOBRE GRY, BEZ MONET.');
+  document.querySelectorAll<HTMLElement>('.card').forEach((card, index) => {
+    const g = games[index], name = gameName(g.id);
+    card.querySelector('h3')!.textContent = name;
+    card.querySelector('.card-body > p')!.textContent = t(g.description, gameCopy[g.id].description);
+    card.querySelector('.micro')!.textContent = t('PERSONAL BEST', 'REKORD OSOBISTY');
+    const play = card.querySelector('.play')!;
+    play.setAttribute('aria-label', t(`Play ${name}`, `Zagraj: ${name}`));
+    play.firstChild!.textContent = t('PLAY ', 'GRAJ ');
+  });
+  const bottom = document.querySelectorAll('.bottom-line span');
+  bottom[0].textContent = t('MADE FOR A LITTLE BREAK.', 'STWORZONE NA MAŁĄ PRZERWĘ.');
+  bottom[1].textContent = t('★  PLAY AT YOUR OWN PACE', '★  GRAJ WE WŁASNYM TEMPIE');
+  text('.back', '←   BACK TO ARCADE', '←   WRÓĆ DO ARCADE');
+  $<HTMLElement>('.game-title-row .eyebrow').firstChild!.textContent = t('NOW PLAYING ', 'TERAZ GRASZ ');
+  text('.score-box .micro', 'SCORE', 'WYNIK');
+  attr('canvas', 'aria-label', 'Game board', 'Plansza gry');
+  text('#replay', 'Replay', 'Zagraj ponownie');
+  text('.game-side > .eyebrow', 'HOW TO PLAY', 'JAK GRAĆ');
+  $('.game-side .hint').innerHTML = t('Use arrow keys or WASD.<br>On touch, use the buttons below.', 'Użyj strzałek lub klawiszy WASD.<br>Na ekranie dotykowym użyj przycisków poniżej.');
+  attr('.dpad', 'aria-label', 'Directional controls', 'Sterowanie kierunkowe');
+  for (const [action, en, pl] of [['up', 'Up', 'Góra'], ['down', 'Down', 'Dół'], ['left', 'Left', 'Lewo'], ['right', 'Right', 'Prawo']]) attr(`[data-action="${action}"]`, 'aria-label', en, pl);
+  $('.side-foot').innerHTML = t('TAKE YOUR TIME.<br>THE HIGH SCORE CAN WAIT.', 'GRAJ BEZ POŚPIECHU.<br>REKORD MOŻE POCZEKAĆ.');
+  attr('.account-section', 'aria-label', 'Player account', 'Konto gracza');
+  text('footer > span:last-child', 'SMALL GAMES. BIG JOY.', 'MAŁE GRY. WIELKA RADOŚĆ.');
+  text('.dialog-head .eyebrow', 'MAKE IT YOURS', 'DOPASUJ DO SIEBIE');
+  text('.dialog-head h2', 'Settings', 'Ustawienia');
+  attr('.dialog-head button', 'aria-label', 'Close settings', 'Zamknij ustawienia');
+  const setting = (label: Element, title: [string, string], detail: [string, string]) => {
+    label.querySelector('strong')!.textContent = t(...title);
+    label.querySelector('small')!.textContent = t(...detail);
+  };
+  setting(music.closest('label')!, ['Music', 'Muzyka'], ['A little soundtrack for your game', 'Muzyka towarzysząca grze']);
+  setting(effects.closest('label')!, ['Sound effects', 'Efekty dźwiękowe'], ['Sounds for points and game over', 'Dźwięki punktów i końca gry']);
+  setting(theme.closest('label')!, ['Theme', 'Motyw'], ['Pick your cabinet colors', 'Wybierz kolory automatu']);
+  for (const [value, en, pl] of [['midnight', 'Midnight', 'Północ'], ['amber', 'Amber', 'Bursztyn'], ['mint', 'Mint', 'Mięta']]) theme.querySelector(`option[value="${value}"]`)!.textContent = t(en, pl);
+  setting(languageLabel, ['Language', 'Język'], ['Choose your language', 'Wybierz język']);
+  languageSelect.setAttribute('aria-label', t('Language', 'Język'));
+  setting(speedLabel, ['Game speed', 'Prędkość gry'], ['Applies to the next run', 'Dotyczy następnej rozgrywki']);
+  speedSelect.setAttribute('aria-label', t('Game speed', 'Prędkość gry'));
+  for (const [value, en, pl] of [['slow', 'Slow', 'Wolno'], ['medium', 'Medium', 'Średnio'], ['fast', 'Fast', 'Szybko']]) speedSelect.querySelector(`option[value="${value}"]`)!.textContent = t(en, pl);
+  setting(mazeLabel, ['Maze size', 'Rozmiar labiryntu'], ['Applies to the next run', 'Dotyczy następnej rozgrywki']);
+  mazeSelect.setAttribute('aria-label', t('Maze size', 'Rozmiar labiryntu'));
+  mazeSelect.querySelector('option[value="custom"]')!.textContent = t('Custom', 'Własny');
+  setting(customLabel, ['Custom size', 'Własny rozmiar'], ['Square maze, 5–50 cells per side', 'Kwadratowy labirynt, 5–50 pól na bok']);
+  customSize.setAttribute('aria-label', t('Custom maze size', 'Własny rozmiar labiryntu'));
+  setting(lanesLabel, ['Road lanes', 'Pasy ruchu'], ['Applies to the next run', 'Dotyczy następnej rozgrywki']);
+  lanesSelect.setAttribute('aria-label', t('Road lanes', 'Pasy ruchu'));
+  for (const value of ['3', '5', '7', '10']) lanesSelect.querySelector(`option[value="${value}"]`)!.textContent = t(`${value} lanes`, `${value} ${value === '5' || value === '7' || value === '10' ? 'pasów' : 'pasy'}`);
+  lanesSelect.querySelector('option[value="custom"]')!.textContent = t('Custom', 'Własna liczba');
+  setting(lanesCustomLabel, ['Custom lanes', 'Własna liczba pasów'], ['1–15 road lanes', '1–15 pasów ruchu']);
+  lanesCustom.setAttribute('aria-label', t('Custom road lanes', 'Własna liczba pasów ruchu'));
+  $<HTMLElement>('.dialog-close').firstChild!.textContent = t('DONE ', 'GOTOWE ');
+  refreshAccountText();
+  renderGameText();
+}
+onLanguageChange(renderLanguage);
+renderLanguage();
 navigate();
