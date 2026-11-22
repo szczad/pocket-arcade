@@ -43,7 +43,7 @@ npm run preview -- --host 127.0.0.1
 
 Provision or select an authorized Supabase project and Vercel project before deploying. The repository does not include credentials or a deployed URL.
 
-1. In Supabase, enable email signups and email confirmation. Set the email OTP length to six digits. Configure both the **Confirm signup** and **Magic Link** email templates to display `{{ .Token }}` instead of a confirmation link; `supabase/templates/confirmation.html` and `supabase/templates/magic_link.html` provide the content. Configure production SMTP, appropriate email rate limits, and the HTTPS site URL for the intended deployment.
+1. In Supabase, enable email signups and confirmation. Under **Authentication → URL Configuration**, set the Site URL to the deployed app URL and add that URL to Redirect URLs. The default email templates send a sign-in link; open it on the same device to return to the app. If custom templates are available, `supabase/templates/confirmation.html` and `supabase/templates/magic_link.html` provide six-digit code templates for inline login. New free-tier projects using Supabase's default email provider cannot customize templates; custom SMTP enables customization. Configure production SMTP for public use and check the provider's rate limits.
 2. Authenticate the Supabase CLI, then apply the migration to the intended project:
 
    ```sh

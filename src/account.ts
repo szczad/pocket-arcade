@@ -127,18 +127,18 @@ export function createAccount(container: HTMLElement, onChange: (snapshot: Accou
         input.addEventListener('input', () => { email = input.value; });
         label.append(input); form.append(label);
         if (codeSent) {
-          const codeLabel = element('label', t('Six-digit code', 'Sześciocyfrowy kod'));
+          const codeLabel = element('label', t('Six-digit code (if provided)', 'Sześciocyfrowy kod (jeśli podano)'));
           const code = element('input');
           code.type = 'text'; code.name = 'token'; code.inputMode = 'numeric'; code.autocomplete = 'one-time-code';
           code.required = true; code.pattern = '[0-9]{6}'; code.maxLength = 6; code.value = token; code.disabled = busy;
           code.addEventListener('input', () => { token = code.value; });
           codeLabel.append(code); form.append(codeLabel);
         }
-        const submit = element('button', busy ? t('Please wait…', 'Proszę czekać…') : codeSent ? t('Verify code', 'Sprawdź kod') : t('Send code', 'Wyślij kod'));
+        const submit = element('button', busy ? t('Please wait…', 'Proszę czekać…') : codeSent ? t('Verify code', 'Sprawdź kod') : t('Send sign-in email', 'Wyślij wiadomość logowania'));
         submit.type = 'submit'; submit.disabled = busy; form.append(submit);
         form.addEventListener('submit', (event) => { event.preventDefault(); void (codeSent ? verifyCode() : sendCode()); });
         if (codeSent) {
-          form.append(button(t('Resend code', 'Wyślij kod ponownie'), () => { void sendCode(); }, busy));
+          form.append(button(t('Resend email', 'Wyślij wiadomość ponownie'), () => { void sendCode(); }, busy));
           form.append(button(t('Change email', 'Zmień adres e-mail'), () => { codeSent = false; token = ''; error = ''; notice = ''; update(); }, busy));
         }
         form.append(button(t('Cancel', 'Anuluj'), () => { loginOpen = false; error = ''; notice = ''; update(); }, busy));
@@ -198,11 +198,11 @@ export function createAccount(container: HTMLElement, onChange: (snapshot: Accou
   async function sendCode() {
     if (!client || busy) return;
     busy = true; error = ''; notice = ''; update();
-    const { error: failure } = await client.auth.signInWithOtp({ email: email.trim() });
+    const { error: failure } = await client.auth.signInWithOtp({ email: email.trim(), options: { emailRedirectTo: `${window.location.origin}${window.location.pathname}` } });
     if (disposed) return;
     busy = false;
-    if (failure) error = () => t('Could not send code. Please wait before retrying if rate limited.', 'Nie udało się wysłać kodu. Jeśli przekroczono limit prób, odczekaj przed ponowieniem.');
-    else { codeSent = true; notice = () => t('Check your email for the six-digit code.', 'Sprawdź pocztę e-mail i znajdź sześciocyfrowy kod.'); }
+    if (failure) error = () => t('Could not send email. Please wait before retrying if rate limited.', 'Nie udało się wysłać wiadomości. Jeśli przekroczono limit prób, odczekaj przed ponowieniem.');
+    else { codeSent = true; notice = () => t('Check your email. Open the sign-in link on this device, or enter the code if provided.', 'Sprawdź pocztę. Otwórz link logowania na tym urządzeniu lub wpisz kod, jeśli go podano.'); }
     update();
   }
   async function verifyCode() {
