@@ -59,6 +59,10 @@ Provision or select an authorized Supabase project and Vercel project before dep
    npx vercel --prod
    ```
 
+Alternatively, push this repository to GitHub and configure a `production` environment with secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` for the intended project. Run **Deploy to Vercel** from the Actions tab on the desired commit. The workflow pulls the project's production environment, builds, and deploys the prebuilt output. Apply Supabase migrations before deploying; the workflow does not modify the database. If Vercel Git integration also deploys this repository, disable its automatic production deployment to avoid duplicate deployments.
+
+GitHub Actions runs the Vite build and local Supabase database tests on pushes and pull requests. CI does not require production credentials.
+
 `vercel.json` selects Vite, `npm ci`, `npm run build`, and `dist`. Game navigation uses URL hashes, so no server rewrite is required. Verify an actual sign-in email and game session on the resulting HTTPS deployment. For a mobile WebView, load that site as the main document with JavaScript and DOM storage enabled; no native bridge, popup, fullscreen, or orientation lock is required.
 
 ## Data and access
