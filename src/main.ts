@@ -215,7 +215,7 @@ const gameCopy: Record<GameId, { name: string; description: string; instructions
   "pac-man": { name: "Pac-Man", description: "Eat the dots and dodge the ghosts.", instructions: "Collect every dot and avoid ghosts. Power pellets let you eat ghosts briefly." },
   "asteroids": { name: "Asteroids", description: "Pilot your ship through an asteroid field.", instructions: "Turn left or right, thrust with up, and fire with down. Destroy asteroids to score." },
   "minesweeper": { name: "Minesweeper", description: "Clear the field without setting off a mine.", instructions: "Reveal every safe square. Numbers count neighboring mines." },
-  "scorched-earth": { name: "game-picker\u0004Scorched Earth", description: "Aim, fire and outlast the enemy tank.", instructions: "Duel the computer. Up and down adjust angle; left and right adjust power. Account for the wind and hit the enemy tank." },
+  "scorched-earth": { name: "game-picker\u0004Scorched Earth", description: "Aim, fire and outlast the enemy tank.", instructions: "Duel the computer. Left and right adjust angle; up and down adjust power. Account for the wind and hit the enemy tank." },
 };
 function gameName(id: GameId): string {
   return t(gameCopy[id].name);

@@ -1176,8 +1176,8 @@ class ScorchedEarth implements Game {
     }
     if (this.delay > 0) { this.delay--; return; }
     if (this.turn === 'cpu') { this.cpuFire(); return; }
-    this.angle = Math.max(10, Math.min(85, this.angle + (this.held.has('up') ? 0.5 : 0) - (this.held.has('down') ? 0.5 : 0)));
-    this.power = Math.max(25, Math.min(100, this.power + (this.held.has('right') ? 0.5 : 0) - (this.held.has('left') ? 0.5 : 0)));
+    this.angle = Math.max(10, Math.min(85, this.angle + (this.held.has('left') ? 0.5 : 0) - (this.held.has('right') ? 0.5 : 0)));
+    this.power = Math.max(25, Math.min(100, this.power + (this.held.has('up') ? 0.5 : 0) - (this.held.has('down') ? 0.5 : 0)));
   }
 
   draw(ctx: GameRenderer): void {

@@ -491,10 +491,10 @@ msgid "Aim, fire and outlast the enemy tank."
 msgstr "Celuj, strzelaj i pokonaj wrogi czołg."
 
 msgid ""
-"Duel the computer. Up and down adjust angle; left and right adjust power. "
+"Duel the computer. Left and right adjust angle; up and down adjust power. "
 "Account for the wind and hit the enemy tank."
 msgstr ""
-"Walcz z komputerem. Góra i dół zmieniają kąt, lewo i prawo siłę strzału. "
+"Walcz z komputerem. Lewo i prawo zmieniają kąt, góra i dół siłę strzału. "
 "Traf przeciwnika, uwzględniając wiatr."
 
 msgid "Smaller board"

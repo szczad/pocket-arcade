@@ -482,10 +482,10 @@ msgid "Aim, fire and outlast the enemy tank."
 msgstr "Aim, fire and outlast the enemy tank."
 
 msgid ""
-"Duel the computer. Up and down adjust angle; left and right adjust power. "
+"Duel the computer. Left and right adjust angle; up and down adjust power. "
 "Account for the wind and hit the enemy tank."
 msgstr ""
-"Duel the computer. Up and down adjust angle; left and right adjust power. "
+"Duel the computer. Left and right adjust angle; up and down adjust power. "
 "Account for the wind and hit the enemy tank."
 
 msgid "Smaller board"
