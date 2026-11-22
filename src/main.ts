@@ -2,6 +2,7 @@ import './styles.css';
 import { createGame, type Action, type Game, type GameId, type SnakeSpeed } from './games';
 import { createAccount, type Theme } from './account';
 import { ArcadeAudio } from './audio';
+import { achievements } from './achievements';
 import { getLanguage, onLanguageChange, setLanguage, t } from './i18n';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
@@ -69,9 +70,50 @@ let storageAvailable = true;
 try { const value = localStorage.getItem('pocket-arcade:audio'); if (value) { const saved = JSON.parse(value); music.checked = saved.music !== false; effects.checked = saved.effects !== false; } } catch { storageAvailable = false; }
 audio.music = music.checked; audio.effects = effects.checked;
 const saveAudio = () => { try { localStorage.setItem('pocket-arcade:audio', JSON.stringify({music: music.checked, effects: effects.checked})); } catch { storageAvailable = false; refreshAccountText(); } };
+let visibleBests: Partial<Record<GameId, number>> = {};
+const achievementPane = document.createElement('section');
+achievementPane.className = 'achievement-pane';
+document.querySelector('.game-side')!.append(achievementPane);
+function renderAchievements(): void {
+  achievementPane.replaceChildren();
+  const items = gameId ? achievements[gameId] : undefined;
+  achievementPane.hidden = !items?.length;
+  if (!items?.length || !gameId) return;
+  const title = document.createElement('p');
+  title.className = 'eyebrow';
+  title.textContent = t('ACHIEVEMENTS', 'OSIĄGNIĘCIA');
+  achievementPane.append(title);
+  const icons = document.createElement('div');
+  icons.className = 'achievement-icons';
+  for (const item of items) {
+    const earned = (visibleBests[gameId] ?? -1) >= item.goal;
+    const icon = document.createElement('button');
+    icon.type = 'button';
+    icon.className = `achievement-icon ${earned ? 'earned' : 'locked'}`;
+    icon.setAttribute('aria-label', `${item.name()}: ${item.description()} — ${earned ? t('Earned', 'Zdobyto') : t('Locked', 'Zablokowano')}`);
+    const mark = document.createElement('span');
+    mark.setAttribute('aria-hidden', 'true');
+    mark.textContent = item.icon;
+    const tip = document.createElement('span');
+    tip.className = 'achievement-tip';
+    tip.setAttribute('aria-hidden', 'true');
+    const name = document.createElement('strong');
+    name.textContent = item.name();
+    const description = document.createElement('span');
+    description.textContent = item.description();
+    const state = document.createElement('small');
+    state.textContent = earned ? t('EARNED', 'ZDOBYTO') : t('LOCKED', 'ZABLOKOWANO');
+    tip.append(name, description, state);
+    icon.append(mark, tip);
+    icons.append(icon);
+  }
+  achievementPane.append(icons);
+}
 let refreshAccountText = () => {};
 const account = createAccount($<HTMLElement>('#account'), state => {
   document.documentElement.dataset.theme = state.theme;
+  visibleBests = state.bests;
+  renderAchievements();
   theme.value = state.theme;
   refreshAccountText = () => {
     for (const g of games) $<HTMLElement>(`[data-best="${g.id}"]`).textContent = state.bests[g.id] === undefined ? t('Not played', 'Jeszcze nie grano') : String(state.bests[g.id]);
@@ -104,6 +146,7 @@ function navigate(): void { cancelAnimationFrame(frame); audio.stop(); release()
 window.addEventListener('hashchange', navigate);
 const keyActions: Record<string, Action> = { ArrowUp: 'up', w: 'up', ArrowDown: 'down', s: 'down', ArrowLeft: 'left', a: 'left', ArrowRight: 'right', d: 'right' };
 function keyAction(event: KeyboardEvent): Action | undefined { return keyActions[event.key] ?? keyActions[event.key.toLowerCase()]; }
+window.addEventListener('keydown', event => { const target = event.target as HTMLElement; if (mode !== 'playing' || settings.open || event.repeat || (event.key.toLowerCase() !== 'p' && event.key !== 'Escape') || target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), #account')) return; event.preventDefault(); pauseGame(); });
 window.addEventListener('keydown', event => { const target = event.target as HTMLElement; if (mode !== 'ended' || settings.open || event.repeat || (event.key !== 'Enter' && event.key !== ' ') || (target !== start && target.closest('input, textarea, select, button, a, [contenteditable]:not([contenteditable="false"])'))) return; event.preventDefault(); begin(); });
 window.addEventListener('keydown', event => { const target = event.target as HTMLElement; if (mode !== 'playing' || settings.open || /INPUT|TEXTAREA|SELECT/.test(target.tagName) || target.isContentEditable) return; const action = keyAction(event); if (!action) return; event.preventDefault(); if (!held.has(action)) { held.add(action); game?.input(action, true); } });
 window.addEventListener('keyup', event => { const action = keyAction(event); if (action && held.has(action)) { held.delete(action); game?.input(action, false); } });
@@ -124,6 +167,7 @@ function gameName(id: GameId): string {
   return t(games.find(g => g.id === id)!.name, gameCopy[id].name);
 }
 function renderGameText(): void {
+  renderAchievements();
   if (gameId) {
     $('#game-title').textContent = gameName(gameId);
     const instructions: Record<GameId, string> = {
