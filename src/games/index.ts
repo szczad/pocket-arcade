@@ -5,6 +5,7 @@ export type GameId = 'snake' | 'breakout' | 'lane-dodger' | 'labyrinth' | 'frog-
 export type Action = 'up' | 'down' | 'left' | 'right';
 export type SnakeSpeed = 'slow' | 'medium' | 'fast';
 export interface Game {
+  readonly resolution?: { width: number; height: number };
   input(action: Action, pressed: boolean): void;
   pointer?(x: number, y: number, flag: boolean): void;
   fire?(): void;
@@ -22,7 +23,7 @@ const rect = (ctx: GameRenderer, color: string, x: number, y: number, w: number,
 class Snake implements Game {
   score = 0;
   status: Game['status'] = 'playing';
-  private body: Point[] = [{ x: 10, y: 10 }, { x: 9, y: 10 }, { x: 8, y: 10 }];
+  private body: Point[] = [{ x: 16, y: 10 }, { x: 15, y: 10 }, { x: 14, y: 10 }];
   private direction: Point = { x: 1, y: 0 };
   private next: Point | null = null;
   private fruit: Point = this.spawnFruit()!;
@@ -32,7 +33,7 @@ class Snake implements Game {
 
   private spawnFruit(): Point | null {
     const free: Point[] = [];
-    for (let y = 0; y < 20; y++) for (let x = 0; x < 20; x++) {
+    for (let y = 0; y < 20; y++) for (let x = 0; x < 32; x++) {
       if (!this.body.some(part => part.x === x && part.y === y)) free.push({ x, y });
     }
     return free.length ? free[Math.floor(Math.random() * free.length)] : null;
@@ -54,7 +55,7 @@ class Snake implements Game {
     this.next = null;
     const head = { x: this.body[0].x + this.direction.x, y: this.body[0].y + this.direction.y };
     const eating = head.x === this.fruit.x && head.y === this.fruit.y;
-    if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20 || this.body.slice(0, eating ? undefined : -1).some(part => part.x === head.x && part.y === head.y)) {
+    if (head.x < 0 || head.x >= 32 || head.y < 0 || head.y >= 20 || this.body.slice(0, eating ? undefined : -1).some(part => part.x === head.x && part.y === head.y)) {
       this.status = 'lost';
       return;
     }
@@ -69,15 +70,15 @@ class Snake implements Game {
   }
 
   draw(ctx: GameRenderer): void {
-    rect(ctx, '#172c37', 0, 0, 240, 240);
-    for (let y = 0; y < 20; y++) for (let x = 0; x < 20; x++) {
-      if ((x + y) % 2 === 0) rect(ctx, '#1c3540', x * 12, y * 12, 12, 12);
+    rect(ctx, '#172c37', 0, 0, 320, 200);
+    for (let y = 0; y < 20; y++) for (let x = 0; x < 32; x++) {
+      if ((x + y) % 2 === 0) rect(ctx, '#1c3540', x * 10, y * 10, 10, 10);
     }
-    rect(ctx, '#ff6f75', this.fruit.x * 12 + 2, this.fruit.y * 12 + 4, 8, 7);
-    rect(ctx, '#f5c763', this.fruit.x * 12 + 6, this.fruit.y * 12 + 2, 3, 2);
+    rect(ctx, '#ff6f75', this.fruit.x * 10 + 2, this.fruit.y * 10 + 3, 6, 6);
+    rect(ctx, '#f5c763', this.fruit.x * 10 + 5, this.fruit.y * 10 + 1, 2, 2);
     this.body.forEach((part, i) => {
-      rect(ctx, i === 0 ? '#a3f4c3' : '#59cba2', part.x * 12 + 1, part.y * 12 + 1, 10, 10);
-      if (i === 0) rect(ctx, '#173641', part.x * 12 + 4 + this.direction.x * 2, part.y * 12 + 4 + this.direction.y * 2, 3, 3);
+      rect(ctx, i === 0 ? '#a3f4c3' : '#59cba2', part.x * 10 + 1, part.y * 10 + 1, 8, 8);
+      if (i === 0) rect(ctx, '#173641', part.x * 10 + 4 + this.direction.x * 2, part.y * 10 + 4 + this.direction.y * 2, 2, 2);
     });
   }
 }
@@ -85,9 +86,9 @@ class Snake implements Game {
 class Breakout implements Game {
   score = 0;
   status: Game['status'] = 'playing';
-  private paddle = 100;
-  private ballX = 120;
-  private ballY = 204;
+  private paddle = 140;
+  private ballX = 160;
+  private ballY = 164;
   private vx = 2.1;
   private vy = -2.7;
   private lives = 3;
@@ -103,7 +104,7 @@ class Breakout implements Game {
 
   step(): void {
     if (this.status !== 'playing') return;
-    this.paddle = Math.max(4, Math.min(196, this.paddle + (Number(this.right) - Number(this.left)) * 3.5));
+    this.paddle = Math.max(4, Math.min(276, this.paddle + (Number(this.right) - Number(this.left)) * 3.5));
     if (this.countdown > 0) {
       this.countdown--;
       this.ballX = this.paddle + 20;
@@ -112,35 +113,35 @@ class Breakout implements Game {
     this.ballX += this.vx;
     this.ballY += this.vy;
     if (this.ballX < 8) { this.ballX = 8; this.vx = Math.abs(this.vx); }
-    if (this.ballX > 232) { this.ballX = 232; this.vx = -Math.abs(this.vx); }
+    if (this.ballX > 312) { this.ballX = 312; this.vx = -Math.abs(this.vx); }
     if (this.ballY < 9) { this.ballY = 9; this.vy = Math.abs(this.vy); }
-    if (this.vy > 0 && this.ballY + 4 >= 214 && this.ballY - this.vy + 4 <= 214 && this.ballX + 4 >= this.paddle && this.ballX - 4 <= this.paddle + 40) {
+    if (this.vy > 0 && this.ballY + 4 >= 174 && this.ballY - this.vy + 4 <= 174 && this.ballX + 4 >= this.paddle && this.ballX - 4 <= this.paddle + 40) {
       const offset = Math.max(-1, Math.min(1, (this.ballX - (this.paddle + 20)) / 20));
-      this.ballY = 210;
+      this.ballY = 170;
       this.vx = offset * 2.8;
       this.vy = -Math.sqrt(3.4 * 3.4 - this.vx * this.vx);
     }
     for (let i = 0; i < this.bricks.length; i++) {
       if (!this.bricks[i]) continue;
-      const x = 12 + (i % 6) * 36;
+      const x = 13 + (i % 6) * 49;
       const y = 34 + Math.floor(i / 6) * 16;
-      if (this.ballX + 4 >= x && this.ballX - 4 <= x + 32 && this.ballY + 4 >= y && this.ballY - 4 <= y + 12) {
+      if (this.ballX + 4 >= x && this.ballX - 4 <= x + 45 && this.ballY + 4 >= y && this.ballY - 4 <= y + 12) {
         this.bricks[i] = false;
         this.score += 10;
         const previousX = this.ballX - this.vx;
-        if (previousX + 4 <= x || previousX - 4 >= x + 32) this.vx = -this.vx;
+        if (previousX + 4 <= x || previousX - 4 >= x + 45) this.vx = -this.vx;
         else this.vy = -this.vy;
         if (this.score === 240) this.status = 'won';
         break;
       }
     }
-    if (this.ballY - 4 > 240) {
+    if (this.ballY - 4 > 200) {
       this.lives--;
       if (!this.lives) this.status = 'lost';
       else {
-        this.paddle = 100;
-        this.ballX = 120;
-        this.ballY = 204;
+        this.paddle = 140;
+        this.ballX = 160;
+        this.ballY = 164;
         this.vx = 2.1;
         this.vy = -2.7;
         this.countdown = 60;
@@ -149,20 +150,20 @@ class Breakout implements Game {
   }
 
   draw(ctx: GameRenderer): void {
-    rect(ctx, '#181b39', 0, 0, 240, 240);
-    rect(ctx, '#343660', 0, 0, 240, 5);
-    rect(ctx, '#343660', 0, 0, 4, 240);
-    rect(ctx, '#343660', 236, 0, 4, 240);
+    rect(ctx, '#181b39', 0, 0, 320, 200);
+    rect(ctx, '#343660', 0, 0, 320, 5);
+    rect(ctx, '#343660', 0, 0, 4, 200);
+    rect(ctx, '#343660', 316, 0, 4, 200);
     const colors = ['#ff7882', '#f4a867', '#f5d36b', '#78dfbd'];
     this.bricks.forEach((alive, i) => {
       if (!alive) return;
-      const x = 12 + (i % 6) * 36;
+      const x = 13 + (i % 6) * 49;
       const y = 34 + Math.floor(i / 6) * 16;
-      rect(ctx, colors[Math.floor(i / 6)], x, y, 32, 12);
-      rect(ctx, '#ffffff55', x + 2, y + 2, 28, 2);
+      rect(ctx, colors[Math.floor(i / 6)], x, y, 45, 12);
+      rect(ctx, '#ffffff55', x + 2, y + 2, 41, 2);
     });
     for (let i = 0; i < this.lives; i++) rect(ctx, '#ff7882', 12 + i * 9, 12, 6, 6);
-    rect(ctx, '#a4f5d0', this.paddle, 214, 40, 7);
+    rect(ctx, '#a4f5d0', this.paddle, 174, 40, 7);
     rect(ctx, '#ffffff', this.ballX - 4, this.ballY - 4, 8, 8);
   }
 }
@@ -196,11 +197,11 @@ class LaneDodger implements Game {
     for (let i = this.vehicles.length - 1; i >= 0; i--) {
       const vehicle = this.vehicles[i];
       vehicle.y += speed;
-      if (vehicle.lane === this.lane && vehicle.y + 26 > 190 && vehicle.y < 222) {
+      if (vehicle.lane === this.lane && vehicle.y + 32 > 150 && vehicle.y < 182) {
         this.status = 'lost';
         return;
       }
-      if (vehicle.y > 240) {
+      if (vehicle.y > 200) {
         this.vehicles.splice(i, 1);
         this.score++;
       }
@@ -208,17 +209,17 @@ class LaneDodger implements Game {
   }
 
   draw(ctx: GameRenderer): void {
-    rect(ctx, '#203844', 0, 0, 240, 240);
-    rect(ctx, '#343a54', 30, 0, 180, 240);
-    rect(ctx, '#f5cf73', 32, 0, 4, 240);
-    rect(ctx, '#f5cf73', 204, 0, 4, 240);
-    for (const x of [90, 150]) for (let y = -30 + this.distance % 40; y < 240; y += 40) rect(ctx, '#aab7b9', x - 2, y, 4, 20);
+    rect(ctx, '#203844', 0, 0, 320, 200);
+    rect(ctx, '#343a54', 70, 0, 180, 200);
+    rect(ctx, '#f5cf73', 72, 0, 4, 200);
+    rect(ctx, '#f5cf73', 244, 0, 4, 200);
+    for (const x of [130, 190]) for (let y = -30 + this.distance % 40; y < 200; y += 40) rect(ctx, '#aab7b9', x - 2, y, 4, 20);
     for (const vehicle of this.vehicles) this.car(ctx, vehicle.lane, vehicle.y, '#ff7d80', '#833f58');
-    this.car(ctx, this.lane, 190, '#86e6c4', '#398f86');
+    this.car(ctx, this.lane, 150, '#86e6c4', '#398f86');
   }
 
   private car(ctx: GameRenderer, lane: number, y: number, color: string, shade: string): void {
-    const x = 47 + lane * 60;
+    const x = 87 + lane * 60;
     rect(ctx, '#151d31', x - 3, y + 5, 32, 6);
     rect(ctx, '#151d31', x - 3, y + 21, 32, 6);
     rect(ctx, color, x, y, 26, 32);
@@ -231,7 +232,8 @@ class LaneDodger implements Game {
 class Labyrinth implements Game {
   score = 0;
   status: Game['status'] = 'playing';
-  private readonly size: number;
+  private readonly rows: number;
+  private readonly columns: number;
   // Each bit represents an open passage: up, right, down, left.
   private readonly passages: number[];
   private readonly held: Action[] = [];
@@ -241,8 +243,9 @@ class Labyrinth implements Game {
   private repeatTicks = 0;
 
   constructor(size: number) {
-    this.size = Number.isFinite(size) ? Math.max(5, Math.min(50, Math.floor(size))) : 10;
-    this.passages = Array(this.size * this.size).fill(0);
+    this.rows = Number.isFinite(size) ? Math.max(5, Math.min(50, Math.floor(size))) : 10;
+    this.columns = Math.round(this.rows * 1.6);
+    this.passages = Array(this.rows * this.columns).fill(0);
     const visited = new Uint8Array(this.passages.length);
     const stack = [0];
     visited[0] = 1;
@@ -254,15 +257,15 @@ class Labyrinth implements Game {
     ];
     while (stack.length) {
       const current = stack[stack.length - 1];
-      const x = current % this.size;
-      const y = Math.floor(current / this.size);
+      const x = current % this.columns;
+      const y = Math.floor(current / this.columns);
       const choices = directions.filter(({ dx, dy }) => {
         const nx = x + dx, ny = y + dy;
-        return nx >= 0 && nx < this.size && ny >= 0 && ny < this.size && !visited[ny * this.size + nx];
+        return nx >= 0 && nx < this.columns && ny >= 0 && ny < this.rows && !visited[ny * this.columns + nx];
       });
       if (!choices.length) { stack.pop(); continue; }
       const direction = choices[Math.floor(Math.random() * choices.length)];
-      const next = (y + direction.dy) * this.size + x + direction.dx;
+      const next = (y + direction.dy) * this.columns + x + direction.dx;
       this.passages[current] |= direction.bit;
       this.passages[next] |= direction.opposite;
       visited[next] = 1;
@@ -289,11 +292,11 @@ class Labyrinth implements Game {
       down: { dx: 0, dy: 1, bit: 4 },
       left: { dx: -1, dy: 0, bit: 8 },
     }[action];
-    if (!(this.passages[this.y * this.size + this.x] & direction.bit)) return;
+    if (!(this.passages[this.y * this.columns + this.x] & direction.bit)) return;
     this.x += direction.dx;
     this.y += direction.dy;
     this.moves++;
-    if (this.x === this.size - 1 && this.y === this.size - 1) {
+    if (this.x === this.columns - 1 && this.y === this.rows - 1) {
       this.score = Math.max(1, 1000 - this.moves);
       this.status = 'won';
     }
@@ -308,25 +311,26 @@ class Labyrinth implements Game {
   }
 
   draw(ctx: GameRenderer): void {
-    rect(ctx, '#18142e', 0, 0, 240, 240);
-    const cell = 232 / this.size;
-    const edge = (n: number) => Math.round(4 + n * cell);
-    const wall = this.size <= 20 ? 3 : 1;
-    for (let y = 0; y < this.size; y++) for (let x = 0; x < this.size; x++) {
-      const left = edge(x), top = edge(y), right = edge(x + 1), bottom = edge(y + 1);
+    rect(ctx, '#18142e', 0, 0, 320, 200);
+    const cell = Math.min(312 / this.columns, 192 / this.rows);
+    const leftEdge = (n: number) => Math.round((320 - this.columns * cell) / 2 + n * cell);
+    const topEdge = (n: number) => Math.round((200 - this.rows * cell) / 2 + n * cell);
+    const wall = this.rows <= 20 ? 2 : 1;
+    for (let y = 0; y < this.rows; y++) for (let x = 0; x < this.columns; x++) {
+      const left = leftEdge(x), top = topEdge(y), right = leftEdge(x + 1), bottom = topEdge(y + 1);
       rect(ctx, (x + y) % 2 ? '#302947' : '#382e4d', left, top, right - left, bottom - top);
-      const passages = this.passages[y * this.size + x];
+      const passages = this.passages[y * this.columns + x];
       if (!(passages & 1)) ctx.rectangle('#a96e82', left, top, right - left + wall, wall);
       if (!(passages & 8)) ctx.rectangle('#a96e82', left, top, wall, bottom - top + wall);
-      if (x === this.size - 1) ctx.rectangle('#a96e82', right, top, wall, bottom - top + wall);
-      if (y === this.size - 1) ctx.rectangle('#a96e82', left, bottom, right - left + wall, wall);
-      if (this.size <= 20 && !(passages & 1)) {
+      if (x === this.columns - 1) ctx.rectangle('#a96e82', right, top, wall, bottom - top + wall);
+      if (y === this.rows - 1) ctx.rectangle('#a96e82', left, bottom, right - left + wall, wall);
+      if (this.rows <= 20 && !(passages & 1)) {
         rect(ctx, '#e5a292', left + wall, top, Math.max(1, Math.floor((right - left) / 3)), 1);
       }
     }
     const sprite = (x: number, y: number, pixels: string[], colors: Record<string, string>) => {
-      const left = edge(x) + wall, top = edge(y) + wall;
-      const width = edge(x + 1) - left, height = edge(y + 1) - top;
+      const left = leftEdge(x) + wall, top = topEdge(y) + wall;
+      const width = leftEdge(x + 1) - left, height = topEdge(y + 1) - top;
       for (let row = 0; row < pixels.length; row++) for (let col = 0; col < pixels[row].length; col++) {
         const color = colors[pixels[row][col]];
         if (!color) continue;
@@ -335,7 +339,7 @@ class Labyrinth implements Game {
         if (x2 > x1 && y2 > y1) rect(ctx, color, x1, y1, x2 - x1, y2 - y1);
       }
     };
-    sprite(this.size - 1, this.size - 1, ['.ggg.', 'gyyyg', 'gy.yg', 'gyyyg', '.ggg.'], { g: '#b98054', y: '#ffe18b' });
+    sprite(this.columns - 1, this.rows - 1, ['.ggg.', 'gyyyg', 'gy.yg', 'gyyyg', '.ggg.'], { g: '#b98054', y: '#ffe18b' });
     sprite(this.x, this.y, ['.mmm.', 'mmmmm', 'me.em', 'mmmmm', '.m.m.'], { m: '#a9edb9', e: '#243f39' });
   }
 }
@@ -346,7 +350,7 @@ class FrogCrossing implements Game {
   private readonly lanes: number;
   private readonly traffic: { x: number; speed: number; color: string; period: number; length: number; obstacle: 'none' | 'sewer' | 'stopped'; obstacleX: number }[];
   private readonly held = new Set<Action>();
-  private x = 120;
+  private x = 160;
   private readonly logs = [{ x: 15, speed: 0.45 }, { x: 70, speed: -0.55 }];
   private row: number;
   private furthest = 0;
@@ -374,7 +378,7 @@ class FrogCrossing implements Game {
     this.held.add(action);
     if (this.status !== 'playing') return;
     if (action === 'left') this.x = Math.max(8, this.x - 16);
-    if (action === 'right') this.x = Math.min(232, this.x + 16);
+    if (action === 'right') this.x = Math.min(312, this.x + 16);
     if (action === 'up') this.row = Math.max(0, this.row - 1);
     if (action === 'down') this.row = Math.min(this.lanes + 3, this.row + 1);
     const progress = this.lanes + 3 - this.row;
@@ -411,32 +415,32 @@ class FrogCrossing implements Game {
     for (const log of this.logs) log.x = (log.x + log.speed + 120) % 120;
     if (this.row > 0 && this.row <= 2) {
       this.x += this.logs[this.row - 1].speed;
-      if (this.x < 0 || this.x > 240) { this.status = 'lost'; return; }
+      if (this.x < 0 || this.x > 320) { this.status = 'lost'; return; }
     }
     this.checkCollision();
   }
 
   draw(ctx: GameRenderer): void {
-    const height = 240 / (this.lanes + 4);
-    rect(ctx, '#343a54', 0, 0, 240, 240);
-    rect(ctx, '#477b55', 0, 0, 240, Math.ceil(height));
-    rect(ctx, '#326b91', 0, height, 240, Math.ceil(height * 2));
+    const height = 200 / (this.lanes + 4);
+    rect(ctx, '#343a54', 0, 0, 320, 200);
+    rect(ctx, '#477b55', 0, 0, 320, Math.ceil(height));
+    rect(ctx, '#326b91', 0, height, 320, Math.ceil(height * 2));
     for (let row = 0; row < 2; row++) {
       const top = height * (row + 1);
-      for (let x = 8; x < 240; x += 40) rect(ctx, '#8bd5d0', x, top + height * .72, 18, Math.max(1, height * .1));
-      for (let x = this.logs[row].x - 120; x < 240; x += 120) {
+      for (let x = 8; x < 320; x += 40) rect(ctx, '#8bd5d0', x, top + height * .72, 18, Math.max(1, height * .1));
+      for (let x = this.logs[row].x - 120; x < 320; x += 120) {
         rect(ctx, '#67452f', x, top + height * .16, 72, Math.max(2, height * .7));
         rect(ctx, '#bb8854', x + 3, top + height * .25, 66, Math.max(1, height * .18));
         rect(ctx, '#e0b47a', x + 8, top + height * .48, 30, Math.max(1, height * .08));
       }
     }
-    rect(ctx, '#477b55', 0, height * (this.lanes + 3), 240, Math.ceil(height));
-    for (let x = 4; x < 240; x += 24) {
+    rect(ctx, '#477b55', 0, height * (this.lanes + 3), 320, Math.ceil(height));
+    for (let x = 4; x < 320; x += 24) {
       rect(ctx, '#78b76b', x, height * (this.lanes + 3) + height * 0.25, 7, Math.max(1, height * 0.12));
     }
     for (let i = 0; i < this.lanes; i++) {
       const top = height * (i + 3);
-      if (i > 0) for (let x = 0; x < 240; x += 24) rect(ctx, '#a4a5a2', x, top, 12, 1);
+      if (i > 0) for (let x = 0; x < 320; x += 24) rect(ctx, '#a4a5a2', x, top, 12, 1);
       const lane = this.traffic[i];
       if (lane.obstacle === 'sewer') {
         rect(ctx, '#eebd67', lane.obstacleX, top + height * .12, 28, Math.max(2, height * .76));
@@ -447,7 +451,7 @@ class FrogCrossing implements Game {
         rect(ctx, '#d38b67', lane.obstacleX, top + height * .2, 40, Math.max(2, height * .6));
         rect(ctx, '#d8e4cf', lane.obstacleX + 11, top + height * .3, 15, Math.max(1, height * .4));
       }
-      for (let x = lane.x - lane.period; x < 240; x += lane.period) {
+      for (let x = lane.x - lane.period; x < 320; x += lane.period) {
         const y = top + height * 0.15;
         const h = height * 0.7;
         rect(ctx, '#1c2335', x + 4, y, lane.length - 8, Math.max(2, h));
@@ -577,14 +581,13 @@ class Tetris implements Game {
   }
 
   draw(ctx: GameRenderer): void {
-    rect(ctx, '#171e34', 0, 0, 240, 240);
-    // A lit cabinet surrounds the ten-column well.
-    rect(ctx, '#36455c', 62, 6, 116, 228);
-    rect(ctx, '#86e6c4', 64, 8, 112, 224);
-    rect(ctx, '#10192b', 65, 9, 110, 220);
+    rect(ctx, '#171e34', 0, 0, 320, 200);
+    rect(ctx, '#36455c', 91, 7, 96, 186);
+    rect(ctx, '#86e6c4', 93, 8, 92, 184);
+    rect(ctx, '#10192b', 94, 10, 90, 180);
     for (let row = 0; row < 20; row++) {
       for (let col = 0; col < 10; col++) {
-        rect(ctx, '#1c2940', 65 + col * 11, 9 + row * 11, 10, 10);
+        rect(ctx, '#1c2940', 94 + col * 9, 10 + row * 9, 8, 8);
         const color = this.board[row][col];
         if (color) this.block(ctx, col, row, color);
       }
@@ -592,19 +595,17 @@ class Tetris implements Game {
     for (const cell of this.cells) {
       if (this.y + cell.y >= 0) this.block(ctx, this.x + cell.x, this.y + cell.y, TETROMINOES[this.kind].color);
     }
-    for (let y = 22; y < 220; y += 24) {
-      rect(ctx, '#4b6275', 51, y, 5, 5);
-      rect(ctx, '#4b6275', 184, y, 5, 5);
-    }
-    rect(ctx, '#f5cf73', 20, 196, 22, 4);
-    rect(ctx, '#f08083', 198, 196, 22, 4);
+    ctx.text('SCORE', 208, 35, { color: '#86e6c4', font: 'bold 10px monospace', align: 'left', baseline: 'top' });
+    ctx.text(String(this.score), 208, 51, { color: '#f5cf73', font: 'bold 12px monospace', align: 'left', baseline: 'top' });
+    ctx.text('LINES', 208, 82, { color: '#86e6c4', font: 'bold 10px monospace', align: 'left', baseline: 'top' });
+    ctx.text(String(this.score / 100), 208, 98, { color: '#f5cf73', font: 'bold 12px monospace', align: 'left', baseline: 'top' });
   }
 
   private block(ctx: GameRenderer, col: number, row: number, color: string): void {
-    const x = 65 + col * 11, y = 9 + row * 11;
-    rect(ctx, color, x, y, 10, 10);
-    rect(ctx, '#eef6db', x + 1, y + 1, 7, 1);
-    rect(ctx, '#34465a', x + 1, y + 8, 8, 1);
+    const x = 94 + col * 9, y = 10 + row * 9;
+    rect(ctx, color, x, y, 8, 8);
+    rect(ctx, '#eef6db', x + 1, y + 1, 5, 1);
+    rect(ctx, '#34465a', x + 1, y + 6, 6, 1);
   }
 }
 
@@ -627,33 +628,58 @@ const PAC_OPPOSITE: Record<Action, Action> = {
   up: 'down', down: 'up', left: 'right', right: 'left',
 };
 
+// Left half of the maze; the right half is its mirror. The opening in the
+// central enclosure connects the ghost house to the corridor above it.
+const PAC_MAZE = [
+  '################',
+  '#...............',
+  '#.####.###.###..',
+  '#.####.###.###..',
+  '#...............',
+  '#.####.#.#####..',
+  '#......#....##..',
+  '#.####.####.....',
+  '#......#....###.',
+  '#.####.#....#...',
+  '#.####.#....#...',
+  '#......#....####',
+  '#.####.####.....',
+  '#...............',
+  '#.####.###.###..',
+  '#...##..........',
+  '#...##.###.###..',
+  '#......#........',
+  '#...............',
+  '################',
+];
+
 class PacMan implements Game {
   score = 0;
   status: Game['status'] = 'playing';
-  private readonly size = 15;
-  // Every odd row connects to its neighbors through multiple vertical corridors.
-  private readonly pellets = Array.from({ length: this.size }, (_, y) =>
-    Array.from({ length: this.size }, (_, x) => {
-      if (this.wall(x, y) || (x === 7 && y === 11)) return 0;
-      return (x === 1 || x === 13) && (y === 1 || y === 13) ? 2 : 1;
+  private readonly columns = 32;
+  private readonly rows = 20;
+  // Every open cell, including the ghost house, joins the surrounding corridors.
+  private readonly pellets = Array.from({ length: this.rows }, (_, y) =>
+    Array.from({ length: this.columns }, (_, x) => {
+      if (this.wall(x, y) || (x === 15 && y === 15)) return 0;
+      return (x === 1 || x === 30) && (y === 1 || y === 16) ? 2 : 1;
     }),
   );
   private remaining = this.pellets.reduce((total, row) => total + row.filter(Boolean).length, 0);
-  private player: Point = { x: 7, y: 11 };
+  private player: Point = { x: 15, y: 15 };
   private direction: Action = 'left';
   private requested: Action = 'left';
   private ticks = 0;
   private power = 0;
   private ghosts: PacGhost[] = [
-    { position: { x: 7, y: 7 }, home: { x: 7, y: 7 }, direction: 'left', color: '#ff6078', respawn: 0 },
-    { position: { x: 5, y: 7 }, home: { x: 5, y: 7 }, direction: 'up', color: '#ff9bd1', respawn: 0 },
-    { position: { x: 9, y: 7 }, home: { x: 9, y: 7 }, direction: 'down', color: '#69dfe9', respawn: 0 },
+    { position: { x: 14, y: 9 }, home: { x: 14, y: 9 }, direction: 'up', color: '#ff6078', respawn: 0 },
+    { position: { x: 15, y: 9 }, home: { x: 15, y: 9 }, direction: 'up', color: '#ff9bd1', respawn: 0 },
+    { position: { x: 17, y: 9 }, home: { x: 17, y: 9 }, direction: 'up', color: '#69dfe9', respawn: 0 },
   ];
 
   private wall(x: number, y: number): boolean {
-    return x <= 0 || y <= 0 || x >= this.size - 1 || y >= this.size - 1
-      || (x % 2 === 0 && y % 2 === 0)
-      || ((y === 4 || y === 10) && (x === 3 || x === 7 || x === 11));
+    if (x < 0 || y < 0 || x >= this.columns || y >= this.rows) return true;
+    return PAC_MAZE[y][Math.min(x, this.columns - 1 - x)] === '#';
   }
 
   private next(position: Point, direction: Action): Point {
@@ -733,45 +759,43 @@ class PacMan implements Game {
   }
 
   draw(ctx: GameRenderer): void {
-    rect(ctx, '#090d25', 0, 0, 240, 240);
-    for (let y = 0; y < this.size; y++) {
-      for (let x = 0; x < this.size; x++) {
-        const px = x * 16;
-        const py = y * 16;
+    rect(ctx, '#090d25', 0, 0, 320, 200);
+    for (let y = 0; y < this.rows; y++) {
+      for (let x = 0; x < this.columns; x++) {
+        const px = x * 10;
+        const py = y * 10;
         if (this.wall(x, y)) {
-          rect(ctx, '#293b9b', px, py, 16, 16);
-          rect(ctx, '#465dcc', px + 2, py + 2, 12, 2);
-          rect(ctx, '#1a286f', px + 2, py + 12, 12, 2);
+          rect(ctx, '#293b9b', px, py, 10, 10);
+          rect(ctx, '#465dcc', px + 1, py + 1, 8, 1);
+          rect(ctx, '#1a286f', px + 1, py + 8, 8, 1);
         } else if (this.pellets[y][x] === 2) {
-          rect(ctx, '#fff0b5', px + 5, py + 5, 6, 6);
+          rect(ctx, '#fff0b5', px + 3, py + 3, 4, 4);
         } else if (this.pellets[y][x] === 1) {
-          rect(ctx, '#f9dca5', px + 7, py + 7, 2, 2);
+          rect(ctx, '#f9dca5', px + 4, py + 4, 2, 2);
         }
       }
     }
     for (const ghost of this.ghosts) {
       if (ghost.respawn) continue;
-      const x = ghost.position.x * 16;
-      const y = ghost.position.y * 16;
+      const x = ghost.position.x * 10;
+      const y = ghost.position.y * 10;
       const color = this.power > 0
         ? (this.power <= 120 && Math.floor(this.power / 15) % 2 === 0 ? '#f6e5bd' : '#626de0')
         : ghost.color;
-      rect(ctx, color, x + 4, y + 2, 8, 2);
-      rect(ctx, color, x + 2, y + 4, 12, 8);
-      rect(ctx, color, x + 2, y + 12, 4, 2);
-      rect(ctx, color, x + 8, y + 12, 4, 2);
-      rect(ctx, '#ffffff', x + 4, y + 6, 3, 3);
-      rect(ctx, '#ffffff', x + 9, y + 6, 3, 3);
-      rect(ctx, '#202650', x + 5, y + 7, 2, 2);
-      rect(ctx, '#202650', x + 10, y + 7, 2, 2);
+      rect(ctx, color, x + 2, y + 1, 6, 8);
+      rect(ctx, color, x + 1, y + 3, 8, 5);
+      rect(ctx, '#ffffff', x + 2, y + 3, 2, 2);
+      rect(ctx, '#ffffff', x + 6, y + 3, 2, 2);
+      rect(ctx, '#202650', x + 3, y + 4, 1, 1);
+      rect(ctx, '#202650', x + 7, y + 4, 1, 1);
     }
-    const x = this.player.x * 16;
-    const y = this.player.y * 16;
-    rect(ctx, '#ffdc47', x + 4, y + 2, 8, 12);
-    rect(ctx, '#ffdc47', x + 2, y + 4, 12, 8);
+    const x = this.player.x * 10;
+    const y = this.player.y * 10;
+    rect(ctx, '#ffdc47', x + 2, y + 1, 6, 8);
+    rect(ctx, '#ffdc47', x + 1, y + 2, 8, 6);
     if (Math.floor(this.ticks / 8) % 2 === 0) {
       const mouth = PAC_DIRECTIONS[this.direction];
-      rect(ctx, '#090d25', x + 7 + mouth.x * 4, y + 7 + mouth.y * 4, mouth.x ? 5 : 2, mouth.y ? 5 : 2);
+      rect(ctx, '#090d25', x + 4 + mouth.x * 3, y + 4 + mouth.y * 3, mouth.x ? 3 : 2, mouth.y ? 3 : 2);
     }
   }
 }
@@ -783,7 +807,7 @@ class Asteroids implements Game {
   score = 0;
   status: Game['status'] = 'playing';
   private held = new Set<Action>();
-  private ship = { x: 120, y: 120, vx: 0, vy: 0, angle: -Math.PI / 2 };
+  private ship = { x: 160, y: 100, vx: 0, vy: 0, angle: -Math.PI / 2 };
   private rocks: SpaceRock[] = [];
   private bullets: SpaceBullet[] = [];
   private wave = 0;
@@ -797,12 +821,12 @@ class Asteroids implements Game {
     else this.held.delete(action);
   }
 
-  private wrap(value: number): number { return (value + 240) % 240; }
+  private wrap(value: number, extent: number): number { return (value + extent) % extent; }
 
   private distanceSquared(ax: number, ay: number, bx: number, by: number): number {
     const dx = Math.abs(ax - bx);
     const dy = Math.abs(ay - by);
-    return Math.min(dx, 240 - dx) ** 2 + Math.min(dy, 240 - dy) ** 2;
+    return Math.min(dx, 320 - dx) ** 2 + Math.min(dy, 200 - dy) ** 2;
   }
 
   private nextWave(): void {
@@ -814,8 +838,8 @@ class Asteroids implements Game {
       const travel = Math.random() * Math.PI * 2;
       const speed = 0.45 + Math.random() * 0.35 + Math.min(this.wave - 1, 10) * 0.025;
       this.rocks.push({
-        x: this.wrap(this.ship.x + Math.cos(direction) * 110),
-        y: this.wrap(this.ship.y + Math.sin(direction) * 110),
+        x: this.wrap(this.ship.x + Math.cos(direction) * 110, 320),
+        y: this.wrap(this.ship.y + Math.sin(direction) * 110, 200),
         vx: Math.cos(travel) * speed, vy: Math.sin(travel) * speed,
         size: 3, shape: Math.floor(Math.random() * 3),
       });
@@ -836,25 +860,25 @@ class Asteroids implements Game {
     ship.vy *= 0.993;
     const speed = Math.hypot(ship.vx, ship.vy);
     if (speed > 3) { ship.vx *= 3 / speed; ship.vy *= 3 / speed; }
-    ship.x = this.wrap(ship.x + ship.vx);
-    ship.y = this.wrap(ship.y + ship.vy);
+    ship.x = this.wrap(ship.x + ship.vx, 320);
+    ship.y = this.wrap(ship.y + ship.vy, 200);
 
     if (this.shotCooldown > 0) this.shotCooldown--;
     if (this.held.has('down') && this.shotCooldown === 0) {
       const dx = Math.cos(ship.angle), dy = Math.sin(ship.angle);
-      this.bullets.push({ x: this.wrap(ship.x + dx * 9), y: this.wrap(ship.y + dy * 9),
+      this.bullets.push({ x: this.wrap(ship.x + dx * 9, 320), y: this.wrap(ship.y + dy * 9, 200),
         vx: ship.vx + dx * 4, vy: ship.vy + dy * 4, life: 55 });
       this.shotCooldown = 12;
     }
     for (let i = this.bullets.length - 1; i >= 0; i--) {
       const bullet = this.bullets[i];
-      bullet.x = this.wrap(bullet.x + bullet.vx);
-      bullet.y = this.wrap(bullet.y + bullet.vy);
+      bullet.x = this.wrap(bullet.x + bullet.vx, 320);
+      bullet.y = this.wrap(bullet.y + bullet.vy, 200);
       if (--bullet.life <= 0) this.bullets.splice(i, 1);
     }
     for (const rock of this.rocks) {
-      rock.x = this.wrap(rock.x + rock.vx);
-      rock.y = this.wrap(rock.y + rock.vy);
+      rock.x = this.wrap(rock.x + rock.vx, 320);
+      rock.y = this.wrap(rock.y + rock.vy, 200);
     }
     for (let i = this.bullets.length - 1; i >= 0; i--) {
       const bullet = this.bullets[i];
@@ -888,9 +912,9 @@ class Asteroids implements Game {
   }
 
   draw(ctx: GameRenderer): void {
-    rect(ctx, '#10182e', 0, 0, 240, 240);
+    rect(ctx, '#10182e', 0, 0, 320, 200);
     for (let i = 0; i < 32; i++) {
-      const x = (i * 79 + 13) % 240, y = (i * 113 + 19) % 240;
+      const x = (i * 79 + 13) % 320, y = (i * 113 + 19) % 200;
       rect(ctx, i % 5 === 0 ? '#f5cf73' : '#52637a', x, y, i % 5 === 0 ? 2 : 1, 2);
     }
     for (const rock of this.rocks) {
@@ -921,8 +945,8 @@ class Asteroids implements Game {
   }
 
   private drawWrapped(ctx: GameRenderer, x: number, y: number, draw: () => void, angle = 0): void {
-    for (const dx of [-240, 0, 240]) for (const dy of [-240, 0, 240]) {
-      if (x + dx < -20 || x + dx > 260 || y + dy < -20 || y + dy > 260) continue;
+    for (const dx of [-320, 0, 320]) for (const dy of [-200, 0, 200]) {
+      if (x + dx < -20 || x + dx > 340 || y + dy < -20 || y + dy > 220) continue;
       ctx.transformed(Math.round(x + dx), Math.round(y + dy), angle, draw);
     }
   }
@@ -931,9 +955,9 @@ class Asteroids implements Game {
 class Minesweeper implements Game {
   score = 0;
   status: Game['status'] = 'playing';
-  private readonly mines = new Uint8Array(100);
-  private readonly revealed = new Uint8Array(100);
-  private readonly flags = new Uint8Array(100);
+  private readonly mines = new Uint8Array(160);
+  private readonly revealed = new Uint8Array(160);
+  private readonly flags = new Uint8Array(160);
   private started = false;
   private exploded = -1;
 
@@ -941,8 +965,8 @@ class Minesweeper implements Game {
   step(): void {}
 
   pointer(x: number, y: number, flag: boolean): void {
-    if (this.status !== 'playing' || !Number.isFinite(x) || !Number.isFinite(y) || x < 0 || y < 0 || x >= 240 || y >= 240) return;
-    const index = Math.floor(y / 24) * 10 + Math.floor(x / 24);
+    if (this.status !== 'playing' || !Number.isFinite(x) || !Number.isFinite(y) || x < 0 || y < 0 || x >= 320 || y >= 200) return;
+    const index = Math.floor(y / 20) * 16 + Math.floor(x / 20);
     if (this.revealed[index]) return;
     if (flag) {
       this.flags[index] ^= 1;
@@ -951,8 +975,8 @@ class Minesweeper implements Game {
     if (this.flags[index]) return;
     if (!this.started) {
       this.started = true;
-      const candidates = Array.from({ length: 100 }, (_, i) => i).filter(i => i !== index);
-      for (let i = 0; i < 15; i++) {
+      const candidates = Array.from({ length: 160 }, (_, i) => i).filter(i => i !== index);
+      for (let i = 0; i < 24; i++) {
         const pick = i + Math.floor(Math.random() * (candidates.length - i));
         [candidates[i], candidates[pick]] = [candidates[pick], candidates[i]];
         this.mines[candidates[i]] = 1;
@@ -975,14 +999,14 @@ class Minesweeper implements Game {
         });
       }
     }
-    if (this.score === 85) this.status = 'won';
+    if (this.score === 136) this.status = 'won';
   }
 
   private forNeighbors(index: number, visit: (neighbor: number) => void): void {
-    const x = index % 10, y = Math.floor(index / 10);
+    const x = index % 16, y = Math.floor(index / 16);
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
-      if ((!dx && !dy) || x + dx < 0 || x + dx >= 10 || y + dy < 0 || y + dy >= 10) continue;
-      visit((y + dy) * 10 + x + dx);
+      if ((!dx && !dy) || x + dx < 0 || x + dx >= 16 || y + dy < 0 || y + dy >= 10) continue;
+      visit((y + dy) * 16 + x + dx);
     }
   }
 
@@ -994,36 +1018,36 @@ class Minesweeper implements Game {
 
   draw(ctx: GameRenderer): void {
     const colors = ['', '#75c9f0', '#86e6a7', '#ff8f83', '#c6a7f3', '#ffd47c', '#70ded1', '#f2a8c9', '#f5e9d2'];
-    rect(ctx, '#18142e', 0, 0, 240, 240);
-    for (let i = 0; i < 100; i++) {
-      const x = (i % 10) * 24, y = Math.floor(i / 10) * 24;
+    rect(ctx, '#18142e', 0, 0, 320, 200);
+    for (let i = 0; i < 160; i++) {
+      const x = (i % 16) * 20, y = Math.floor(i / 16) * 20;
       const showMine = this.status === 'lost' && this.mines[i];
       if (this.revealed[i] || showMine) {
-        rect(ctx, i === this.exploded ? '#a74855' : '#302947', x + 1, y + 1, 22, 22);
+        rect(ctx, i === this.exploded ? '#a74855' : '#302947', x + 1, y + 1, 18, 18);
         if (showMine) {
-          rect(ctx, '#171629', x + 7, y + 7, 10, 10);
-          rect(ctx, '#171629', x + 10, y + 4, 4, 16);
-          rect(ctx, '#171629', x + 4, y + 10, 16, 4);
-          rect(ctx, '#f5cf73', x + 9, y + 8, 3, 3);
+          rect(ctx, '#171629', x + 6, y + 6, 8, 8);
+          rect(ctx, '#171629', x + 8, y + 3, 4, 14);
+          rect(ctx, '#171629', x + 3, y + 8, 14, 4);
+          rect(ctx, '#f5cf73', x + 7, y + 7, 3, 3);
         } else {
           const count = this.neighborCount(i);
           if (count) {
-            ctx.text(String(count), x + 12, y + 13, {
-              color: colors[count], font: 'bold 16px monospace', align: 'center', baseline: 'middle',
+            ctx.text(String(count), x + 10, y + 10, {
+              color: colors[count], font: 'bold 14px monospace', align: 'center', baseline: 'middle',
             });
           }
         }
       } else {
-        rect(ctx, '#655779', x + 1, y + 1, 22, 22);
-        rect(ctx, '#a898ae', x + 2, y + 2, 20, 3);
-        rect(ctx, '#a898ae', x + 2, y + 2, 3, 20);
-        rect(ctx, '#3a304d', x + 3, y + 20, 19, 2);
-        rect(ctx, '#3a304d', x + 20, y + 3, 2, 19);
+        rect(ctx, '#655779', x + 1, y + 1, 18, 18);
+        rect(ctx, '#a898ae', x + 2, y + 2, 16, 2);
+        rect(ctx, '#a898ae', x + 2, y + 2, 2, 16);
+        rect(ctx, '#3a304d', x + 3, y + 17, 15, 2);
+        rect(ctx, '#3a304d', x + 17, y + 3, 2, 15);
         if (this.flags[i]) {
-          rect(ctx, '#f5e9d2', x + 10, y + 6, 2, 12);
-          rect(ctx, '#ff8883', x + 12, y + 6, 6, 3);
-          rect(ctx, '#ff8883', x + 12, y + 9, 4, 3);
-          rect(ctx, '#f5e9d2', x + 7, y + 18, 9, 2);
+          rect(ctx, '#f5e9d2', x + 8, y + 4, 2, 11);
+          rect(ctx, '#ff8883', x + 10, y + 4, 6, 3);
+          rect(ctx, '#ff8883', x + 10, y + 7, 4, 3);
+          rect(ctx, '#f5e9d2', x + 5, y + 15, 9, 2);
         }
       }
     }
@@ -1036,10 +1060,10 @@ class ScorchedEarth implements Game {
   score = 0;
   status: Game['status'] = 'playing';
   private readonly held = new Set<Action>();
-  private readonly terrain = new Float64Array(240);
+  private readonly terrain = new Float64Array(320);
   private readonly tanks = [
-    { x: 30, health: 100 },
-    { x: 210, health: 100 },
+    { x: 70, health: 100 },
+    { x: 250, health: 100 },
   ];
   private angle = 45;
   private power = 65;
@@ -1051,8 +1075,8 @@ class ScorchedEarth implements Game {
 
   constructor(private readonly difficulty: 'easy' | 'medium' | 'hard') {
     const phase = Math.random() * Math.PI * 2;
-    for (let x = 0; x < 240; x++) {
-      this.terrain[x] = Math.round(181 + 12 * Math.sin(x / 34 + phase) + 5 * Math.sin(x / 13 + phase));
+    for (let x = 0; x < 320; x++) {
+      this.terrain[x] = Math.round(151 + 12 * Math.sin(x / 34 + phase) + 5 * Math.sin(x / 13 + phase));
     }
     this.newWind();
   }
@@ -1068,7 +1092,7 @@ class ScorchedEarth implements Game {
   }
 
   private newWind(): void { this.wind = Math.round((Math.random() * 2 - 1) * 10); }
-  private ground(x: number): number { return this.terrain[Math.max(0, Math.min(239, Math.floor(x)))]; }
+  private ground(x: number): number { return this.terrain[Math.max(0, Math.min(319, Math.floor(x)))]; }
   private tankY(index: number): number { return this.ground(this.tanks[index].x) - 5; }
 
   private makeShell(index: number, angle: number, power: number): TankShell {
@@ -1096,7 +1120,7 @@ class ScorchedEarth implements Game {
   }
 
   private collision(shell: TankShell): boolean {
-    if (shell.x < 0 || shell.x >= 240 || shell.y >= 240 || shell.age > 600) return true;
+    if (shell.x < 0 || shell.x >= 320 || shell.y >= 200 || shell.age > 600) return true;
     if (shell.y < 0) return false;
     for (let i = 0; i < 2; i++) {
       if (shell.age > 3 && Math.abs(shell.x - this.tanks[i].x) <= 6 &&
@@ -1138,11 +1162,11 @@ class ScorchedEarth implements Game {
       tank.health -= dealt;
       if (i === 1) this.score += dealt;
     }
-    for (let column = Math.max(0, Math.floor(x - 18)); column <= Math.min(239, Math.ceil(x + 18)); column++) {
+    for (let column = Math.max(0, Math.floor(x - 18)); column <= Math.min(319, Math.ceil(x + 18)); column++) {
       const dx = column - x;
       const depth = Math.sqrt(Math.max(0, 18 * 18 - dx * dx));
       if (y + depth > this.terrain[column] && y - depth <= this.terrain[column]) {
-        this.terrain[column] = Math.min(235, y + depth);
+        this.terrain[column] = Math.min(195, y + depth);
       }
     }
     if (this.tanks[0].health <= 0) this.status = 'lost';
@@ -1165,7 +1189,7 @@ class ScorchedEarth implements Game {
       if (this.collision(this.shell)) {
         const { x, y } = this.shell;
         this.shell = null;
-        if (x >= 0 && x < 240 && y >= 0 && y < 240) this.explode(x, y);
+        if (x >= 0 && x < 320 && y >= 0 && y < 200) this.explode(x, y);
         else {
           this.turn = this.turn === 'player' ? 'cpu' : 'player';
           this.delay = 45;
@@ -1181,15 +1205,15 @@ class ScorchedEarth implements Game {
   }
 
   draw(ctx: GameRenderer): void {
-    rect(ctx, '#171b38', 0, 0, 240, 240);
-    rect(ctx, '#283353', 0, 106, 240, 30);
-    rect(ctx, '#36415b', 15, 117, 32, 3);
-    rect(ctx, '#36415b', 145, 109, 48, 3);
-    for (let x = 0; x < 240; x++) {
+    rect(ctx, '#171b38', 0, 0, 320, 200);
+    rect(ctx, '#283353', 0, 86, 320, 30);
+    rect(ctx, '#36415b', 15, 97, 32, 3);
+    rect(ctx, '#36415b', 225, 89, 48, 3);
+    for (let x = 0; x < 320; x++) {
       const y = this.terrain[x];
-      rect(ctx, '#547a61', x, y, 1, 240 - y);
+      rect(ctx, '#547a61', x, y, 1, 200 - y);
       rect(ctx, '#a0b879', x, y, 1, 2);
-      rect(ctx, '#405c50', x, y + 12, 1, Math.max(0, 228 - y));
+      rect(ctx, '#405c50', x, y + 12, 1, Math.max(0, 188 - y));
     }
     for (let i = 0; i < 2; i++) {
       const tank = this.tanks[i];
@@ -1211,10 +1235,10 @@ class ScorchedEarth implements Game {
     const label = (value: string, x: number, y: number, color: string, align: 'left' | 'center' | 'right') =>
       ctx.text(value, x, y, { color, font: 'bold 9px monospace', align, baseline: 'top' });
     label(`${t("YOU")} ${this.tanks[0].health}`, 8, 8, '#86e6c4', 'left');
-    label(`CPU ${this.tanks[1].health}`, 232, 8, '#ff8883', 'right');
-    label(`${t("WIND")} ${this.wind > 0 ? '>' : this.wind < 0 ? '<' : '-'} ${Math.abs(this.wind)}`, 120, 8, '#f5e9d2', 'center');
-    label(`${t("ANGLE")} ${Math.round(this.angle)}  ${t("POWER")} ${Math.round(this.power)}`, 120, 25, '#f5e9d2', 'center');
-    label(this.turn === 'player' ? t("YOUR TURN") : t("CPU TURN"), 120, 39, '#f5e9d2', 'center');
+    label(`CPU ${this.tanks[1].health}`, 312, 8, '#ff8883', 'right');
+    label(`${t("WIND")} ${this.wind > 0 ? '>' : this.wind < 0 ? '<' : '-'} ${Math.abs(this.wind)}`, 160, 8, '#f5e9d2', 'center');
+    label(`${t("ANGLE")} ${Math.round(this.angle)}  ${t("POWER")} ${Math.round(this.power)}`, 160, 25, '#f5e9d2', 'center');
+    label(this.turn === 'player' ? t("YOUR TURN") : t("CPU TURN"), 160, 39, '#f5e9d2', 'center');
   }
 }
 

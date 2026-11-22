@@ -740,14 +740,23 @@ msgstr "Trudny"
 msgid "Maze size"
 msgstr "Rozmiar labiryntu"
 
+msgid "16×10"
+msgstr "16×10"
+
+msgid "24×15"
+msgstr "24×15"
+
+msgid "32×20"
+msgstr "32×20"
+
 msgid "Custom"
 msgstr "Własny"
 
 msgid "Custom size"
 msgstr "Własny rozmiar"
 
-msgid "Square maze, 5–50 cells per side"
-msgstr "Kwadratowy labirynt, 5–50 pól na bok"
+msgid "Maze height, 5–50 cells; width follows 16:10"
+msgstr "Wysokość labiryntu: 5–50 pól; szerokość zgodna z proporcją 16:10"
 
 msgid "Custom maze size"
 msgstr "Własny rozmiar labiryntu"

@@ -727,14 +727,23 @@ msgstr "Hard"
 msgid "Maze size"
 msgstr "Maze size"
 
+msgid "16×10"
+msgstr "16×10"
+
+msgid "24×15"
+msgstr "24×15"
+
+msgid "32×20"
+msgstr "32×20"
+
 msgid "Custom"
 msgstr "Custom"
 
 msgid "Custom size"
 msgstr "Custom size"
 
-msgid "Square maze, 5–50 cells per side"
-msgstr "Square maze, 5–50 cells per side"
+msgid "Maze height, 5–50 cells; width follows 16:10"
+msgstr "Maze height, 5–50 cells; width follows 16:10"
 
 msgid "Custom maze size"
 msgstr "Custom maze size"

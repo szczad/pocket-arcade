@@ -5,7 +5,7 @@ export interface TextStyle {
   baseline: 'top' | 'middle';
 }
 
-/** Logical 240×240 game drawing operations, independent of the display backend. */
+/** Logical game drawing operations, independent of the display backend. */
 export interface GameRenderer {
   rectangle(color: string, x: number, y: number, width: number, height: number): void;
   line(color: string, width: number, x1: number, y1: number, x2: number, y2: number): void;
