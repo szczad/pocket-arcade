@@ -304,26 +304,36 @@ class Labyrinth implements Game {
   }
 
   draw(ctx: CanvasRenderingContext2D): void {
-    rect(ctx, '#172c37', 0, 0, 240, 240);
-    const cell = 236 / this.size;
-    const edge = (n: number) => Math.round(2 + n * cell);
-    ctx.fillStyle = '#f5cf73';
-    ctx.fillRect(edge(this.size - 1) + 1, edge(this.size - 1) + 1,
-      Math.max(1, edge(this.size) - edge(this.size - 1) - 2),
-      Math.max(1, edge(this.size) - edge(this.size - 1) - 2));
-    ctx.fillStyle = '#a8b8bc';
+    rect(ctx, '#18142e', 0, 0, 240, 240);
+    const cell = 232 / this.size;
+    const edge = (n: number) => Math.round(4 + n * cell);
+    const wall = this.size <= 20 ? 3 : 1;
     for (let y = 0; y < this.size; y++) for (let x = 0; x < this.size; x++) {
-      const passages = this.passages[y * this.size + x];
       const left = edge(x), top = edge(y), right = edge(x + 1), bottom = edge(y + 1);
-      if (!(passages & 1)) ctx.fillRect(left, top, right - left + 1, 1);
-      if (!(passages & 8)) ctx.fillRect(left, top, 1, bottom - top + 1);
-      if (x === this.size - 1) ctx.fillRect(right, top, 1, bottom - top + 1);
-      if (y === this.size - 1) ctx.fillRect(left, bottom, right - left + 1, 1);
+      rect(ctx, (x + y) % 2 ? '#302947' : '#382e4d', left, top, right - left, bottom - top);
+      const passages = this.passages[y * this.size + x];
+      ctx.fillStyle = '#a96e82';
+      if (!(passages & 1)) ctx.fillRect(left, top, right - left + wall, wall);
+      if (!(passages & 8)) ctx.fillRect(left, top, wall, bottom - top + wall);
+      if (x === this.size - 1) ctx.fillRect(right, top, wall, bottom - top + wall);
+      if (y === this.size - 1) ctx.fillRect(left, bottom, right - left + wall, wall);
+      if (this.size <= 20 && !(passages & 1)) {
+        rect(ctx, '#e5a292', left + wall, top, Math.max(1, Math.floor((right - left) / 3)), 1);
+      }
     }
-    const left = edge(this.x), top = edge(this.y);
-    ctx.fillStyle = '#86e6c4';
-    ctx.fillRect(left + 1, top + 1, Math.max(1, edge(this.x + 1) - left - 2),
-      Math.max(1, edge(this.y + 1) - top - 2));
+    const sprite = (x: number, y: number, pixels: string[], colors: Record<string, string>) => {
+      const left = edge(x) + wall, top = edge(y) + wall;
+      const width = edge(x + 1) - left, height = edge(y + 1) - top;
+      for (let row = 0; row < pixels.length; row++) for (let col = 0; col < pixels[row].length; col++) {
+        const color = colors[pixels[row][col]];
+        if (!color) continue;
+        const x1 = Math.round(left + col * width / 5), x2 = Math.round(left + (col + 1) * width / 5);
+        const y1 = Math.round(top + row * height / 5), y2 = Math.round(top + (row + 1) * height / 5);
+        if (x2 > x1 && y2 > y1) rect(ctx, color, x1, y1, x2 - x1, y2 - y1);
+      }
+    };
+    sprite(this.size - 1, this.size - 1, ['.ggg.', 'gyyyg', 'gy.yg', 'gyyyg', '.ggg.'], { g: '#b98054', y: '#ffe18b' });
+    sprite(this.x, this.y, ['.mmm.', 'mmmmm', 'me.em', 'mmmmm', '.m.m.'], { m: '#a9edb9', e: '#243f39' });
   }
 }
 
