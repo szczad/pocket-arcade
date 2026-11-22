@@ -22,6 +22,7 @@ const games: { id: GameId; name: () => string }[] = [
   { id: 'pac-man', name: () => t('Pac-Man', 'Pac-Man') },
   { id: 'asteroids', name: () => t('Asteroids', 'Asteroidy') },
   { id: 'minesweeper', name: () => t('Minesweeper', 'Saper') },
+  { id: 'scorched-earth', name: () => t('Scorched Earth', 'Spalona ziemia') },
 ];
 const storageKey = 'pocket-arcade.guest.v1';
 const isTheme = (value: unknown): value is Theme => value === 'midnight' || value === 'amber' || value === 'mint';

@@ -1,3 +1,5 @@
+import { t } from '../i18n';
+
 export type GameId = 'snake' | 'breakout' | 'lane-dodger' | 'labyrinth' | 'frog-crossing' | 'tetris' | 'pac-man' | 'asteroids' | 'minesweeper' | 'scorched-earth';
 export type Action = 'up' | 'down' | 'left' | 'right';
 export type SnakeSpeed = 'slow' | 'medium' | 'fast';
@@ -1218,15 +1220,15 @@ class ScorchedEarth implements Game {
     ctx.textBaseline = 'top';
     ctx.textAlign = 'left';
     ctx.fillStyle = '#86e6c4';
-    ctx.fillText(`YOU ${this.tanks[0].health}`, 8, 8);
+    ctx.fillText(`${t('YOU', 'TY')} ${this.tanks[0].health}`, 8, 8);
     ctx.fillStyle = '#ff8883';
     ctx.textAlign = 'right';
     ctx.fillText(`CPU ${this.tanks[1].health}`, 232, 8);
     ctx.textAlign = 'center';
     ctx.fillStyle = '#f5e9d2';
-    ctx.fillText(`WIND ${this.wind > 0 ? '>' : this.wind < 0 ? '<' : '-'} ${Math.abs(this.wind)}`, 120, 8);
-    ctx.fillText(`ANGLE ${Math.round(this.angle)}  POWER ${Math.round(this.power)}`, 120, 25);
-    ctx.fillText(this.turn === 'player' ? 'YOUR TURN' : 'CPU TURN', 120, 39);
+    ctx.fillText(`${t('WIND', 'WIATR')} ${this.wind > 0 ? '>' : this.wind < 0 ? '<' : '-'} ${Math.abs(this.wind)}`, 120, 8);
+    ctx.fillText(`${t('ANGLE', 'KĄT')} ${Math.round(this.angle)}  ${t('POWER', 'SIŁA')} ${Math.round(this.power)}`, 120, 25);
+    ctx.fillText(this.turn === 'player' ? t('YOUR TURN', 'TWÓJ RUCH') : t('CPU TURN', 'RUCH CPU'), 120, 39);
     ctx.textAlign = 'left';
   }
 }

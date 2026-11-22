@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
-select plan(21);
+select plan(24);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-000000000001', 'player-a@example.test'),
@@ -34,6 +34,9 @@ select is((select score from public.personal_bests where game_id = 'snake'), 60,
 select is(public.save_personal_best('minesweeper', 12), 12, 'Minesweeper best is stored');
 select is(public.save_personal_best('minesweeper', 5), 12, 'lower Minesweeper score does not replace best');
 select is((select score from public.personal_bests where game_id = 'minesweeper'), 12, 'Minesweeper best is readable by its owner');
+select is(public.save_personal_best('scorched-earth', 12), 12, 'Scorched Earth best is stored');
+select is(public.save_personal_best('scorched-earth', 5), 12, 'lower Scorched Earth score does not replace best');
+select is((select score from public.personal_bests where game_id = 'scorched-earth'), 12, 'Scorched Earth best is readable by its owner');
 select throws_ok($$select public.save_personal_best('snake', -1)$$, '23514', null, 'negative score rejected');
 select throws_ok($$select public.save_personal_best('unknown', 1)$$, '23514', null, 'unknown game rejected');
 reset role;
