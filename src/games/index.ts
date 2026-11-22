@@ -1,4 +1,4 @@
-export type GameId = 'snake' | 'breakout' | 'lane-dodger' | 'labyrinth';
+export type GameId = 'snake' | 'breakout' | 'lane-dodger' | 'labyrinth' | 'frog-crossing';
 export type Action = 'up' | 'down' | 'left' | 'right';
 export type SnakeSpeed = 'slow' | 'medium' | 'fast';
 export interface Game {
@@ -337,11 +337,105 @@ class Labyrinth implements Game {
   }
 }
 
-export function createGame(id: GameId, snakeSpeed: SnakeSpeed = 'medium', mazeSize = 10): Game {
+class FrogCrossing implements Game {
+  score = 0;
+  status: Game['status'] = 'playing';
+  private readonly lanes: number;
+  private readonly traffic: { x: number; speed: number; color: string }[];
+  private readonly held = new Set<Action>();
+  private x = 120;
+  // Row zero is the river, and the final row is the starting bank.
+  private row: number;
+  private furthest = 0;
+
+  constructor(lanes: number) {
+    this.lanes = Number.isFinite(lanes) ? Math.max(1, Math.min(15, Math.floor(lanes))) : 5;
+    this.row = this.lanes + 1;
+    this.traffic = Array.from({ length: this.lanes }, (_, i) => ({
+      x: Math.random() * 120,
+      speed: (i % 2 === 0 ? 1 : -1) * (0.65 + (i % 3) * 0.2),
+      color: ['#ff827d', '#f5cc6d', '#8dbfe7'][i % 3],
+    }));
+  }
+
+  input(action: Action, pressed: boolean): void {
+    if (!pressed) { this.held.delete(action); return; }
+    if (this.held.has(action)) return;
+    this.held.add(action);
+    if (this.status !== 'playing') return;
+    if (action === 'left') this.x = Math.max(8, this.x - 16);
+    if (action === 'right') this.x = Math.min(232, this.x + 16);
+    if (action === 'up') this.row = Math.max(0, this.row - 1);
+    if (action === 'down') this.row = Math.min(this.lanes + 1, this.row + 1);
+    const progress = this.lanes + 1 - this.row;
+    if (progress > this.furthest) {
+      this.score += (progress - this.furthest) * 10;
+      this.furthest = progress;
+    }
+    if (this.row === 0) {
+      this.score += 100;
+      this.status = 'won';
+    } else {
+      this.checkCollision();
+    }
+  }
+
+  private checkCollision(): void {
+    if (this.row > this.lanes) return;
+    const lane = this.traffic[this.row - 1];
+    // Cars repeat every 120 pixels; account for their wrapped copies.
+    const offset = ((this.x - lane.x) % 120 + 120) % 120;
+    if (offset < 40 || offset > 114) this.status = 'lost';
+  }
+
+  step(): void {
+    if (this.status !== 'playing') return;
+    for (const lane of this.traffic) lane.x = (lane.x + lane.speed + 120) % 120;
+    this.checkCollision();
+  }
+
+  draw(ctx: CanvasRenderingContext2D): void {
+    const height = 240 / (this.lanes + 2);
+    rect(ctx, '#343a54', 0, 0, 240, 240);
+    rect(ctx, '#326b91', 0, 0, 240, Math.ceil(height));
+    rect(ctx, '#478fa8', 0, Math.max(1, height * 0.3), 240, Math.max(1, height * 0.12));
+    for (let x = 8; x < 240; x += 40) {
+      rect(ctx, '#8bd5d0', x, height * 0.65, 18, Math.max(1, height * 0.1));
+    }
+    rect(ctx, '#477b55', 0, height * (this.lanes + 1), 240, Math.ceil(height));
+    for (let x = 4; x < 240; x += 24) {
+      rect(ctx, '#78b76b', x, height * (this.lanes + 1) + height * 0.25, 7, Math.max(1, height * 0.12));
+    }
+    for (let i = 0; i < this.lanes; i++) {
+      const top = height * (i + 1);
+      if (i > 0) for (let x = 0; x < 240; x += 24) rect(ctx, '#a4a5a2', x, top, 12, 1);
+      const lane = this.traffic[i];
+      for (let x = lane.x - 120; x < 240; x += 120) {
+        const y = top + height * 0.15;
+        const h = height * 0.7;
+        rect(ctx, '#1c2335', x + 4, y, 32, Math.max(2, h));
+        rect(ctx, lane.color, x, y + h * 0.15, 40, Math.max(2, h * 0.7));
+        rect(ctx, '#b7e0df', x + 11, y + h * 0.25, 15, Math.max(1, h * 0.5));
+        rect(ctx, '#ffe6a0', x + (lane.speed > 0 ? 36 : 1), y + h * 0.3, 3, Math.max(1, h * 0.35));
+      }
+    }
+    const size = Math.min(16, height * 0.8);
+    const left = this.x - size / 2, top = (this.row + 0.5) * height - size / 2;
+    rect(ctx, '#347d53', left, top + size * 0.25, size, size * 0.6);
+    rect(ctx, '#9be783', left + size * 0.15, top + size * 0.15, size * 0.7, size * 0.7);
+    rect(ctx, '#b8f59c', left + size * 0.05, top, size * 0.3, size * 0.3);
+    rect(ctx, '#b8f59c', left + size * 0.65, top, size * 0.3, size * 0.3);
+    rect(ctx, '#203b35', left + size * 0.15, top + size * 0.08, Math.max(1, size * 0.1), Math.max(1, size * 0.1));
+    rect(ctx, '#203b35', left + size * 0.75, top + size * 0.08, Math.max(1, size * 0.1), Math.max(1, size * 0.1));
+  }
+}
+
+export function createGame(id: GameId, snakeSpeed: SnakeSpeed = 'medium', mazeSize = 10, frogLanes = 5): Game {
   switch (id) {
     case 'snake': return new Snake({ slow: 16, medium: 8, fast: 4 }[snakeSpeed]);
     case 'breakout': return new Breakout();
     case 'lane-dodger': return new LaneDodger();
     case 'labyrinth': return new Labyrinth(mazeSize);
+    case 'frog-crossing': return new FrogCrossing(frogLanes);
   }
 }
