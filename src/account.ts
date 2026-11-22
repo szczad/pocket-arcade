@@ -1,5 +1,6 @@
 import { createClient, type Session, type SupabaseClient } from '@supabase/supabase-js';
 
+import { achievements } from './achievements';
 import { onLanguageChange, t } from './i18n';
 import type { GameId } from './games';
 export type Theme = 'midnight' | 'amber' | 'mint';
@@ -11,15 +12,15 @@ export interface AccountSnapshot {
   signedIn: boolean;
 }
 
-const games: { id: GameId; name: () => string; badge: () => string; goal: number }[] = [
-  { id: 'snake', name: () => t('Snake', 'Wąż'), badge: () => t('Orchard Keeper', 'Strażnik sadu'), goal: 50 },
-  { id: 'breakout', name: () => t('Breakout', 'Breakout'), badge: () => t('Wall Breaker', 'Pogromca murów'), goal: 120 },
-  { id: 'lane-dodger', name: () => t('Lane Dodger', 'Unik na drodze'), badge: () => t('Clear Road', 'Wolna droga'), goal: 10 },
-  { id: 'labyrinth', name: () => t('Labyrinth', 'Labirynt'), badge: () => t('Maze Explorer', 'Odkrywca labiryntu'), goal: 1 },
-  { id: 'frog-crossing', name: () => t('Frog Crossing', 'Żabia przeprawa'), badge: () => t('River Bound', 'Przez rzekę'), goal: 1 },
-  { id: 'tetris', name: () => t('Tetris', 'Tetris'), badge: () => t('Line Builder', 'Budowniczy linii'), goal: 100 },
-  { id: 'pac-man', name: () => t('Pac-Man', 'Pac-Man'), badge: () => t('Maze Muncher', 'Pożeracz labiryntu'), goal: 100 },
-  { id: 'asteroids', name: () => t('Asteroids', 'Asteroidy'), badge: () => t('Asteroid Breaker', 'Pogromca asteroid'), goal: 100 },
+const games: { id: GameId; name: () => string }[] = [
+  { id: 'snake', name: () => t('Snake', 'Wąż') },
+  { id: 'breakout', name: () => t('Breakout', 'Breakout') },
+  { id: 'lane-dodger', name: () => t('Lane Dodger', 'Unik na drodze') },
+  { id: 'labyrinth', name: () => t('Labyrinth', 'Labirynt') },
+  { id: 'frog-crossing', name: () => t('Frog Crossing', 'Żabia przeprawa') },
+  { id: 'tetris', name: () => t('Tetris', 'Tetris') },
+  { id: 'pac-man', name: () => t('Pac-Man', 'Pac-Man') },
+  { id: 'asteroids', name: () => t('Asteroids', 'Asteroidy') },
 ];
 const storageKey = 'pocket-arcade.guest.v1';
 const isTheme = (value: unknown): value is Theme => value === 'midnight' || value === 'amber' || value === 'mint';
@@ -153,8 +154,16 @@ export function createAccount(container: HTMLElement, onChange: (snapshot: Accou
         const score = bests[game.id];
         const pending = pendingBests[game.id] !== undefined ? t(' (not saved)', ' (nie zapisano)') : '';
         const result = score === undefined ? t('Not played', 'Jeszcze nie grano') : score;
-        const achievement = score !== undefined && score >= game.goal ? t('Earned', 'Zdobyto') : t(`Locked (goal: ${game.goal})`, `Zablokowano (cel: ${game.goal})`);
-        list.append(element('li', `${game.name()}: ${result}${pending} — ${game.badge()}: ${achievement}`));
+        const item = element('li', `${game.name()}: ${result}${pending}`);
+        const badges = element('ul');
+        for (const achievement of achievements[game.id] ?? []) {
+          const state = score !== undefined && score >= achievement.goal
+            ? t('Earned', 'Zdobyto')
+            : t(`Locked (${score ?? 0}/${achievement.goal})`, `Zablokowano (${score ?? 0}/${achievement.goal})`);
+          badges.append(element('li', `${achievement.icon} ${achievement.name()}: ${achievement.description()} — ${state}`));
+        }
+        item.append(badges);
+        list.append(item);
       }
       container.append(list);
       if (pendingTheme !== null) container.append(element('p', t('Theme change not saved.', 'Zmiana motywu nie została zapisana.')));
