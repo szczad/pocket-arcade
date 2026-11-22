@@ -344,13 +344,13 @@ class FrogCrossing implements Game {
   private readonly traffic: { x: number; speed: number; color: string; period: number; length: number; obstacle: 'none' | 'sewer' | 'stopped'; obstacleX: number }[];
   private readonly held = new Set<Action>();
   private x = 120;
-  // Row zero is the river, and the final row is the starting bank.
+  private readonly logs = [{ x: 15, speed: 0.45 }, { x: 70, speed: -0.55 }];
   private row: number;
   private furthest = 0;
 
   constructor(lanes: number) {
     this.lanes = Number.isFinite(lanes) ? Math.max(1, Math.min(15, Math.floor(lanes))) : 5;
-    this.row = this.lanes + 1;
+    this.row = this.lanes + 3;
     this.traffic = Array.from({ length: this.lanes }, (_, i) => {
       const tier = Math.floor((this.lanes - 1 - i) * 4 / this.lanes);
       return {
@@ -373,8 +373,8 @@ class FrogCrossing implements Game {
     if (action === 'left') this.x = Math.max(8, this.x - 16);
     if (action === 'right') this.x = Math.min(232, this.x + 16);
     if (action === 'up') this.row = Math.max(0, this.row - 1);
-    if (action === 'down') this.row = Math.min(this.lanes + 1, this.row + 1);
-    const progress = this.lanes + 1 - this.row;
+    if (action === 'down') this.row = Math.min(this.lanes + 3, this.row + 1);
+    const progress = this.lanes + 3 - this.row;
     if (progress > this.furthest) {
       this.score += (progress - this.furthest) * 10;
       this.furthest = progress;
@@ -388,8 +388,14 @@ class FrogCrossing implements Game {
   }
 
   private checkCollision(): void {
-    if (this.row > this.lanes) return;
-    const lane = this.traffic[this.row - 1];
+    if (this.row > this.lanes + 2 || this.row === 0) return;
+    if (this.row <= 2) {
+      const log = this.logs[this.row - 1];
+      const offset = ((this.x - log.x) % 120 + 120) % 120;
+      if (offset >= 72) this.status = 'lost';
+      return;
+    }
+    const lane = this.traffic[this.row - 3];
     const offset = ((this.x - lane.x) % lane.period + lane.period) % lane.period;
     const obstacleWidth = lane.obstacle === 'sewer' ? 28 : 40;
     if (offset < lane.length || offset > lane.period - 6 ||
@@ -399,23 +405,34 @@ class FrogCrossing implements Game {
   step(): void {
     if (this.status !== 'playing') return;
     for (const lane of this.traffic) lane.x = (lane.x + lane.speed + lane.period) % lane.period;
+    for (const log of this.logs) log.x = (log.x + log.speed + 120) % 120;
+    if (this.row > 0 && this.row <= 2) {
+      this.x += this.logs[this.row - 1].speed;
+      if (this.x < 0 || this.x > 240) { this.status = 'lost'; return; }
+    }
     this.checkCollision();
   }
 
   draw(ctx: CanvasRenderingContext2D): void {
-    const height = 240 / (this.lanes + 2);
+    const height = 240 / (this.lanes + 4);
     rect(ctx, '#343a54', 0, 0, 240, 240);
-    rect(ctx, '#326b91', 0, 0, 240, Math.ceil(height));
-    rect(ctx, '#478fa8', 0, Math.max(1, height * 0.3), 240, Math.max(1, height * 0.12));
-    for (let x = 8; x < 240; x += 40) {
-      rect(ctx, '#8bd5d0', x, height * 0.65, 18, Math.max(1, height * 0.1));
+    rect(ctx, '#477b55', 0, 0, 240, Math.ceil(height));
+    rect(ctx, '#326b91', 0, height, 240, Math.ceil(height * 2));
+    for (let row = 0; row < 2; row++) {
+      const top = height * (row + 1);
+      for (let x = 8; x < 240; x += 40) rect(ctx, '#8bd5d0', x, top + height * .72, 18, Math.max(1, height * .1));
+      for (let x = this.logs[row].x - 120; x < 240; x += 120) {
+        rect(ctx, '#67452f', x, top + height * .16, 72, Math.max(2, height * .7));
+        rect(ctx, '#bb8854', x + 3, top + height * .25, 66, Math.max(1, height * .18));
+        rect(ctx, '#e0b47a', x + 8, top + height * .48, 30, Math.max(1, height * .08));
+      }
     }
-    rect(ctx, '#477b55', 0, height * (this.lanes + 1), 240, Math.ceil(height));
+    rect(ctx, '#477b55', 0, height * (this.lanes + 3), 240, Math.ceil(height));
     for (let x = 4; x < 240; x += 24) {
-      rect(ctx, '#78b76b', x, height * (this.lanes + 1) + height * 0.25, 7, Math.max(1, height * 0.12));
+      rect(ctx, '#78b76b', x, height * (this.lanes + 3) + height * 0.25, 7, Math.max(1, height * 0.12));
     }
     for (let i = 0; i < this.lanes; i++) {
-      const top = height * (i + 1);
+      const top = height * (i + 3);
       if (i > 0) for (let x = 0; x < 240; x += 24) rect(ctx, '#a4a5a2', x, top, 12, 1);
       const lane = this.traffic[i];
       if (lane.obstacle === 'sewer') {
