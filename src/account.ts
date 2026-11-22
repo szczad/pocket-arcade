@@ -1,6 +1,6 @@
 import { createClient, type Session, type SupabaseClient } from '@supabase/supabase-js';
 
-import { achievements } from './achievements';
+import { achievements, achievementIcons } from './achievements';
 import { onLanguageChange, t } from './i18n';
 import type { GameId } from './games';
 export type Theme = 'midnight' | 'amber' | 'mint';
@@ -110,7 +110,11 @@ export function createAccount(container: HTMLElement, onChange: (snapshot: Accou
   }
   function render() {
     container.replaceChildren();
-    const heading = element('h2', t('Player', 'Gracz'));
+    const back = element('a', t('← Back to arcade', '← Wróć do salonu'));
+    back.href = '#';
+    back.className = 'account-back';
+    container.append(back);
+    const heading = element('h1', t('Account', 'Konto'));
     container.append(heading);
     if (!client) {
       container.append(element('p', t('Accounts are unavailable. You can still play as a guest.', 'Konta są niedostępne. Nadal możesz grać jako gość.')));
@@ -125,29 +129,30 @@ export function createAccount(container: HTMLElement, onChange: (snapshot: Accou
       container.append(element('p', t(`Signed in as ${session.user.email || 'player'}`, `Zalogowano jako ${session.user.email || 'gracz'}`)));
       if (loading) container.append(element('p', t('Loading account records…', 'Wczytywanie rekordów konta…')));
       if (loadFailed && !loading) container.append(button(t('Retry loading records', 'Ponów wczytywanie rekordów'), () => { error = ''; void retrySaves(); }));
-      const list = element('ul');
-      for (const game of games) {
-        const score = bests[game.id];
-        const pending = pendingBests[game.id] !== undefined ? t(' (not saved)', ' (nie zapisano)') : '';
-        const result = score === undefined ? t('Not played', 'Jeszcze nie grano') : score;
-        const item = element('li', `${game.name()}: ${result}${pending}`);
-        const badges = element('ul');
-        for (const achievement of achievements[game.id] ?? []) {
-          const state = score !== undefined && score >= achievement.goal
-            ? t('Earned', 'Zdobyto')
-            : t(`Locked (${score ?? 0}/${achievement.goal})`, `Zablokowano (${score ?? 0}/${achievement.goal})`);
-          badges.append(element('li', `${achievement.icon} ${achievement.name()}: ${achievement.description()} — ${state}`));
-        }
-        item.append(badges);
-        list.append(item);
-      }
-      container.append(list);
+    }
+    const stats = element('section');
+    stats.className = 'account-stats';
+    stats.append(element('h2', t('Records & achievements', 'Rekordy i osiągnięcia')));
+    for (const game of games) {
+      const score = bests[game.id];
+      const pending = pendingBests[game.id] !== undefined ? t(' (not saved)', ' (nie zapisano)') : '';
+      const result = score === undefined ? t('Not played', 'Jeszcze nie grano') : score;
+      const row = element('section');
+      row.className = 'account-game';
+      row.append(element('h3', game.name()), element('p', `${t('Personal best', 'Rekord')}: ${result}${pending}`));
+      const items = achievements[game.id];
+      if (items?.length) row.append(achievementIcons(items, score));
+      stats.append(row);
+    }
+    container.append(stats);
+    container.append(button(t('Reset stats', 'Resetuj statystyki'), () => { void resetStats(); }, busy || loading || importBusy || scoreSaving.size > 0));
+    if (session) {
       if (pendingTheme !== null) container.append(element('p', t('Theme change not saved.', 'Zmiana motywu nie została zapisana.')));
       if (pendingTheme !== null || games.some(({ id }) => pendingBests[id] !== undefined)) {
-        container.append(button(t('Retry saving', 'Ponów zapisywanie'), () => { error = ''; void retrySaves(); }));
+        container.append(button(t('Retry saving', 'Ponów zapisywanie'), () => { error = ''; void retrySaves(); }, busy));
       }
       if (!importOpen && games.some(({ id }) => guest.bests[id] !== undefined)) {
-        container.append(button(t('Import device records', 'Importuj rekordy z urządzenia'), () => { offerImport(); update(); }));
+        container.append(button(t('Import device records', 'Importuj rekordy z urządzenia'), () => { offerImport(); update(); }, busy));
       }
       if (importOpen) {
         const section = element('section');
@@ -161,10 +166,11 @@ export function createAccount(container: HTMLElement, onChange: (snapshot: Accou
             choices.append(element('li', t(`${game.name()}: device ${score}, account ${accountScore}`, `${game.name()}: urządzenie ${score}, konto ${accountScore}`)));
           }
         }
-        section.append(choices, button(importBusy ? t('Merging…', 'Łączenie…') : t('Merge records', 'Połącz rekordy'), () => { void mergeRecords(); }, importBusy || loading || loadFailed),
-          button(t('Not now', 'Nie teraz'), () => { importOpen = false; update(); }, importBusy));
+        section.append(choices, button(importBusy ? t('Merging…', 'Łączenie…') : t('Merge records', 'Połącz rekordy'), () => { void mergeRecords(); }, busy || importBusy || loading || loadFailed),
+          button(t('Not now', 'Nie teraz'), () => { importOpen = false; update(); }, busy || importBusy));
         container.append(section);
       }
+      container.append(button(t('Delete account', 'Usuń konto'), () => { void deleteAccount(); }, busy || loading || importBusy || scoreSaving.size > 0));
       container.append(button(t('Log out', 'Wyloguj się'), () => { void logout(); }, busy));
     }
     if (!storage) container.append(element('p', t('Device storage is unavailable; guest records and preferences are session-only.', 'Pamięć urządzenia jest niedostępna; rekordy i ustawienia gościa zostaną zachowane tylko do końca sesji.')));
@@ -172,6 +178,50 @@ export function createAccount(container: HTMLElement, onChange: (snapshot: Accou
     if (error) { const message = element('p', typeof error === 'function' ? error() : error); message.setAttribute('role', 'alert'); container.append(message); }
   }
 
+  async function resetStats() {
+    if (busy || loading || importBusy || scoreSaving.size) return;
+    if (!window.confirm(t('Reset all personal bests and achievements? This cannot be undone.', 'Zresetować wszystkie rekordy i osiągnięcia? Tej operacji nie można cofnąć.'))) return;
+    error = ''; notice = '';
+    if (!session) {
+      guest.bests = {}; bests = {}; persistGuest();
+      notice = () => t('Guest stats reset on this device.', 'Statystyki gościa na tym urządzeniu zostały zresetowane.');
+      update();
+      return;
+    }
+    if (!client) return;
+    const version = epoch, userId = session.user.id;
+    busy = true; update();
+    try {
+      const { error: failure } = await client.rpc('reset_player_stats');
+      if (!current(version, userId)) return;
+      if (failure) throw failure;
+      bests = {}; pendingBests = {};
+      notice = () => t('Account stats reset.', 'Statystyki konta zostały zresetowane.');
+    } catch {
+      if (current(version, userId)) error = () => t('Could not reset stats. Please try again.', 'Nie udało się zresetować statystyk. Spróbuj ponownie.');
+    } finally {
+      if (current(version, userId)) { busy = false; update(); }
+    }
+  }
+
+  async function deleteAccount() {
+    if (!client || !session || busy || loading || importBusy || scoreSaving.size) return;
+    if (!window.confirm(t('Delete your account, records, and preferences permanently? This cannot be undone.', 'Trwale usunąć konto, rekordy i ustawienia? Tej operacji nie można cofnąć.'))) return;
+    const version = epoch, userId = session.user.id;
+    busy = true; error = ''; notice = ''; update();
+    let failure;
+    try { ({ error: failure } = await client.rpc('delete_player_account')); }
+    catch { failure = true; }
+    if (!current(version, userId)) return;
+    if (failure) {
+      error = () => t('Could not delete account. Please try again.', 'Nie udało się usunąć konta. Spróbuj ponownie.');
+      busy = false; update(); return;
+    }
+    try { await client.auth.signOut({ scope: 'local' }); } catch { /* The account is already deleted. */ }
+    if (current(version, userId)) applySession(null);
+    notice = () => t('Account deleted.', 'Konto zostało usunięte.');
+    if (!disposed) { busy = false; update(); }
+  }
   async function signInWithGoogle() {
     if (!client || busy) return;
     busy = true; error = ''; notice = ''; update();

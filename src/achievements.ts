@@ -31,3 +31,32 @@ export const achievements: Partial<Record<GameId, Achievement[]>> = {
   'pac-man': [{ name: () => t('Maze Muncher', 'Pożeracz labiryntu'), description: () => t('Score 100 points in Pac-Man.', 'Zdobądź 100 punktów w Pac-Manie.'), goal: 100, icon: 'P' }],
   asteroids: [{ name: () => t('Asteroid Breaker', 'Pogromca asteroid'), description: () => t('Score 100 points in Asteroids.', 'Zdobądź 100 punktów w Asteroidach.'), goal: 100, icon: 'A' }],
 };
+
+/** The same accessible achievement badges are used in games and on the account page. */
+export function achievementIcons(items: Achievement[], score: number | undefined): HTMLElement {
+  const icons = document.createElement('div');
+  icons.className = 'achievement-icons';
+  for (const item of items) {
+    const earned = (score ?? -1) >= item.goal;
+    const icon = document.createElement('button');
+    icon.type = 'button';
+    icon.className = `achievement-icon ${earned ? 'earned' : 'locked'}`;
+    icon.setAttribute('aria-label', `${item.name()}: ${item.description()} — ${earned ? t('Earned', 'Zdobyto') : t('Locked', 'Zablokowano')}`);
+    const mark = document.createElement('span');
+    mark.setAttribute('aria-hidden', 'true');
+    mark.textContent = item.icon;
+    const tip = document.createElement('span');
+    tip.className = 'achievement-tip';
+    tip.setAttribute('aria-hidden', 'true');
+    const name = document.createElement('strong');
+    name.textContent = item.name();
+    const description = document.createElement('span');
+    description.textContent = item.description();
+    const state = document.createElement('small');
+    state.textContent = earned ? t('EARNED', 'ZDOBYTO') : t('LOCKED', 'ZABLOKOWANO');
+    tip.append(name, description, state);
+    icon.append(mark, tip);
+    icons.append(icon);
+  }
+  return icons;
+}

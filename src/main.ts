@@ -3,7 +3,7 @@ import logoUrl from '../assets/logo/pocket-arcade-green.svg';
 import { createGame, type Action, type Game, type GameId, type SnakeSpeed } from './games';
 import { createAccount, type Theme } from './account';
 import { ArcadeAudio } from './audio';
-import { achievements } from './achievements';
+import { achievements, achievementIcons } from './achievements';
 import { getLanguage, onLanguageChange, setLanguage, t } from './i18n';
 import { setupLegal } from './legal';
 
@@ -53,7 +53,7 @@ expandButton.addEventListener('click', () => {
   document.querySelector('.game-layout')!.classList.toggle('expanded', expanded);
   renderExpandButton();
 });
-const picker = $<HTMLElement>('#picker'), gameView = $<HTMLElement>('#game-view');
+const picker = $<HTMLElement>('#picker'), gameView = $<HTMLElement>('#game-view'), accountView = $<HTMLElement>('.account-section');
 const canvas = $<HTMLCanvasElement>('canvas'), ctx = canvas.getContext('2d')!;
 const settings = $<HTMLDialogElement>('#settings'), audio = new ArcadeAudio();
 const music = $<HTMLInputElement>('#music'), effects = $<HTMLInputElement>('#effects'), theme = $<HTMLSelectElement>('#theme');
@@ -133,31 +133,7 @@ function renderAchievements(): void {
   title.className = 'eyebrow';
   title.textContent = t('ACHIEVEMENTS', 'OSIĄGNIĘCIA');
   achievementPane.append(title);
-  const icons = document.createElement('div');
-  icons.className = 'achievement-icons';
-  for (const item of items) {
-    const earned = (visibleBests[gameId] ?? -1) >= item.goal;
-    const icon = document.createElement('button');
-    icon.type = 'button';
-    icon.className = `achievement-icon ${earned ? 'earned' : 'locked'}`;
-    icon.setAttribute('aria-label', `${item.name()}: ${item.description()} — ${earned ? t('Earned', 'Zdobyto') : t('Locked', 'Zablokowano')}`);
-    const mark = document.createElement('span');
-    mark.setAttribute('aria-hidden', 'true');
-    mark.textContent = item.icon;
-    const tip = document.createElement('span');
-    tip.className = 'achievement-tip';
-    tip.setAttribute('aria-hidden', 'true');
-    const name = document.createElement('strong');
-    name.textContent = item.name();
-    const description = document.createElement('span');
-    description.textContent = item.description();
-    const state = document.createElement('small');
-    state.textContent = earned ? t('EARNED', 'ZDOBYTO') : t('LOCKED', 'ZABLOKOWANO');
-    tip.append(name, description, state);
-    icon.append(mark, tip);
-    icons.append(icon);
-  }
-  achievementPane.append(icons);
+  achievementPane.append(achievementIcons(items, visibleBests[gameId]));
 }
 let refreshAccountText = () => {};
 const account = createAccount($<HTMLElement>('#account'), state => {
@@ -168,11 +144,11 @@ const account = createAccount($<HTMLElement>('#account'), state => {
   refreshAccountText = () => {
     for (const g of games) $<HTMLElement>(`[data-best="${g.id}"]`).textContent = state.bests[g.id] === undefined ? t('Not played', 'Jeszcze nie grano') : String(state.bests[g.id]);
     $('#storage-note').textContent = state.sessionOnly || !storageAvailable ? t('Device storage unavailable; guest data and preferences last for this session only.', 'Pamięć urządzenia jest niedostępna; dane gościa i ustawienia zostaną zachowane tylko podczas tej sesji.') : '';
-    $<HTMLButtonElement>('#login').textContent = state.signedIn ? t('Player ↓', 'Gracz ↓') : t('Log in ↗', 'Zaloguj się ↗');
+    $<HTMLButtonElement>('#login').textContent = state.signedIn ? t('Account ↗', 'Konto ↗') : t('Account / Log in ↗', 'Konto / Zaloguj się ↗');
   };
   refreshAccountText();
 });
-$<HTMLButtonElement>('#login').onclick = () => { account.openLogin(); $('#account').scrollIntoView({behavior: 'smooth', block: 'start'}); };
+$<HTMLButtonElement>('#login').onclick = () => { location.hash = '#account'; };
 music.onchange = () => { audio.music = music.checked; if (!music.checked) audio.stopMusic(); else if (mode === 'playing') void audio.start(); saveAudio(); };
 effects.onchange = () => { audio.effects = effects.checked; if (!effects.checked) audio.stopEffects(); saveAudio(); };
 theme.onchange = () => account.setTheme(theme.value as Theme);
@@ -192,7 +168,7 @@ function tick(now: number): void { if (mode !== 'playing' || !game) return; if (
 start.onclick = begin;
 pauseButton.onclick = () => mode === 'playing' ? pauseGame() : begin();
 $<HTMLButtonElement>('#replay').onclick = () => { resetGame(); begin(); };
-function navigate(): void { cancelAnimationFrame(frame); audio.stop(); release(); const id = location.hash.slice(6) as GameId; const selected = location.hash.startsWith('#game/') ? games.find(g => g.id === id) : undefined; gameId = selected?.id ?? null; picker.hidden = !!selected; gameView.hidden = !selected; flagMode = false; flagButton.hidden = gameId !== 'minesweeper'; fireButton.hidden = gameId !== 'scorched-earth'; $<HTMLElement>('.dpad').hidden = gameId === 'minesweeper'; canvas.classList.toggle('mine-board', gameId === 'minesweeper'); renderFlagButton(); if (selected) { $('#game-number').textContent = selected.number; resetGame(); } else { game = null; mode = 'ready'; } renderGameText(); window.scrollTo(0, 0); }
+function navigate(): void { cancelAnimationFrame(frame); audio.stop(); release(); const id = location.hash.slice(6) as GameId; const selected = location.hash.startsWith('#game/') ? games.find(g => g.id === id) : undefined; const accountPage = location.hash === '#account'; gameId = selected?.id ?? null; picker.hidden = !!selected || accountPage; gameView.hidden = !selected; accountView.hidden = !accountPage; flagMode = false; flagButton.hidden = gameId !== 'minesweeper'; fireButton.hidden = gameId !== 'scorched-earth'; $<HTMLElement>('.dpad').hidden = gameId === 'minesweeper'; canvas.classList.toggle('mine-board', gameId === 'minesweeper'); renderFlagButton(); if (selected) { $('#game-number').textContent = selected.number; resetGame(); } else { game = null; mode = 'ready'; } renderGameText(); window.scrollTo(0, 0); }
 window.addEventListener('hashchange', navigate);
 const keyActions: Record<string, Action> = { ArrowUp: 'up', w: 'up', ArrowDown: 'down', s: 'down', ArrowLeft: 'left', a: 'left', ArrowRight: 'right', d: 'right' };
 function keyAction(event: KeyboardEvent): Action | undefined { return keyActions[event.key] ?? keyActions[event.key.toLowerCase()]; }
