@@ -18,6 +18,7 @@ games.push({ id: 'tetris', number: '06', name: 'Tetris', description: 'Stack blo
 games.find(game => game.id === 'frog-crossing')!.description = 'Cross the road and ride logs to the far bank.';
 games.push({ id: 'pac-man', number: '07', name: 'Pac-Man', description: 'Eat the dots and dodge the ghosts.', color: 'gold', art: `<svg viewBox="0 0 300 180" aria-hidden="true" shape-rendering="crispEdges"><rect width="300" height="180" fill="#15172f"/><path d="M20 20h260v140H20z M45 48h60v24H45z M195 48h60v24h-60z M45 108h65v23H45z M190 108h65v23h-65z M128 32h44v25h-44z M128 123h44v25h-44z" fill="none" stroke="#6e8de5" stroke-width="7"/><path d="M74 89h7m22 0h7m22 0h7m22 0h7m22 0h7m22 0h7" stroke="#f8dca4" stroke-width="6"/><path d="M52 80h20v5h7v6H65l14 9h-7v5H52v-5h-6V85h6z" fill="#f2d785"/><path d="M220 81h21v5h5v20h-7v-5h-6v5h-6v-5h-7v5h-5V86h5z" fill="#ff9784"/><path d="M222 88h5v5h-5zm12 0h5v5h-5z" fill="#fff"/></svg>` });
 games.push({ id: 'asteroids', number: '08', name: 'Asteroids', description: 'Pilot your ship through an asteroid field.', color: 'mint', art: `<svg viewBox="0 0 300 180" aria-hidden="true" shape-rendering="crispEdges"><rect width="300" height="180" fill="#17192f"/><path d="M25 30h4v4h-4zm200 10h4v4h-4zM70 140h4v4h-4zm200-30h4v4h-4z" fill="#f6e5bd"/><path d="M64 50h24l12 12v18L87 92H60L49 76V62zM211 100h24l12 12v18l-13 12h-27l-11-16v-14z" fill="#9b8f9a"/><path d="M62 57h14v5H62zm151 52h13v5h-13z" fill="#d6c1b1"/><path d="M151 63l22 54-22-10-22 10z" fill="#b9efc6"/><path d="M147 109h8v16h-8z" fill="#ff9a78"/></svg>` });
+games.push({ id: 'minesweeper', number: '09', name: 'Minesweeper', description: 'Clear the field without setting off a mine.', color: 'coral', art: `<svg viewBox="0 0 300 180" aria-hidden="true" shape-rendering="crispEdges"><rect width="300" height="180" fill="#25233b"/><path d="M70 18h160v144H70z" fill="#687d79" stroke="#a9edb9" stroke-width="4"/><path d="M70 54h160M70 90h160M70 126h160M110 18v144M150 18v144M190 18v144" stroke="#293b3b" stroke-width="3"/><path d="M73 57h34v30H73zm80-36h34v30h-34zm40 72h34v30h-34z" fill="#b2c8ad"/><path d="M125 118v-24h3v24zm3-24h16v11h-16z" fill="#ff9784"/><path d="M202 28h18v18h-18zM198 34h26v6h-26z" fill="#25233b"/></svg>` });
 app.innerHTML = `<div class="shell"><header class="topbar"><a class="brand" href="#" aria-label="Pocket Arcade home"><span class="brand-mark" aria-hidden="true">✦</span><span>POCKET<span class="brand-small">ARCADE</span></span></a><div class="header-actions"><button class="text-button" id="login">Log in <span aria-hidden="true">↗</span></button><button class="icon-button settings-open" aria-label="Open settings" title="Settings">⚙</button></div></header><main><section id="picker"><div class="hero"><div><p class="eyebrow"><span class="status-dot"></span> YOUR LITTLE CORNER OF PLAY</p><h1>Pocket Arcade<span class="period">.</span></h1><p class="intro">A little play goes a long way.<br>Pick a cartridge and beat your best.</p></div><div class="hero-stamp" aria-hidden="true"><span>INSERT</span><strong>COIN</strong><span>JUST KIDDING ✳</span></div></div><div class="section-heading"><div><p class="eyebrow">THE COLLECTION <span class="subtle">/ 03 GAMES</span></p><h2>Choose your game</h2></div><span class="section-note">GOOD GAMES, NO QUARTERS.</span></div><div class="cards">${games.map(g => `<article class="card ${g.color}"><div class="art">${g.art}<span class="art-index">${g.number} / 03</span></div><div class="card-body"><div class="card-title"><h3>${g.name}</h3><span aria-hidden="true">✳</span></div><p>${g.description}</p><div class="card-bottom"><div><span class="micro">PERSONAL BEST</span><strong class="best" data-best="${g.id}">Not played</strong></div><a class="play" href="#game/${g.id}" aria-label="Play ${g.name}">PLAY <span aria-hidden="true">↗</span></a></div></div></article>`).join('')}</div><div class="bottom-line"><span>MADE FOR A LITTLE BREAK.</span><span>★ &nbsp; PLAY AT YOUR OWN PACE</span></div></section><section id="game-view" hidden><div class="game-heading"><a class="back" href="#">← &nbsp; BACK TO ARCADE</a><button class="icon-button settings-open" aria-label="Open settings" title="Settings">⚙</button></div><div class="game-layout"><div class="game-main"><div class="game-title-row"><div><p class="eyebrow">NOW PLAYING <span class="subtle">/ <span id="game-number"></span></span></p><h2 id="game-title"></h2></div><div class="score-box"><span class="micro">SCORE</span><strong id="score">0</strong></div></div><div class="board-wrap"><canvas width="240" height="240" aria-label="Game board"></canvas><div id="board-message" class="board-message"><span id="message-label">READY, PLAYER?</span><strong id="message-title">Let's play.</strong><button id="start" class="primary">START GAME <span>→</span></button></div></div><div class="game-actions"><button id="pause" class="secondary" disabled>Pause</button><button id="replay" class="secondary">Replay</button></div></div><aside class="game-side"><p class="eyebrow">HOW TO PLAY</p><p id="instructions"></p><p class="hint">Use arrow keys or WASD.<br>On touch, use the buttons below.</p><div class="dpad" aria-label="Directional controls"><button data-action="up" aria-label="Up">▲</button><button data-action="left" aria-label="Left">◀</button><button data-action="down" aria-label="Down">▼</button><button data-action="right" aria-label="Right">▶</button></div><p class="side-foot">TAKE YOUR TIME.<br>THE HIGH SCORE CAN WAIT.</p></aside></div></section><section class="account-section" aria-label="Player account"><div id="account"></div></section></main><footer><span>POCKET ARCADE <span class="period">✳</span></span><span>SMALL GAMES. BIG JOY.</span></footer></div><dialog id="settings"><form method="dialog"><div class="dialog-head"><div><p class="eyebrow">MAKE IT YOURS</p><h2>Settings</h2></div><button class="icon-button" value="close" aria-label="Close settings">×</button></div><label class="setting-row"><span><strong>Music</strong><small>A little soundtrack for your game</small></span><input id="music" type="checkbox" checked></label><label class="setting-row"><span><strong>Sound effects</strong><small>Sounds for points and game over</small></span><input id="effects" type="checkbox" checked></label><label class="setting-row"><span><strong>Theme</strong><small>Pick your cabinet colors</small></span><select id="theme"><option value="midnight">Midnight</option><option value="amber">Amber</option><option value="mint">Mint</option></select></label><p id="storage-note" class="hint"></p><button class="primary dialog-close" value="close">DONE <span>→</span></button></form></dialog>`;
 const $ = <T extends Element>(selector: string) => app.querySelector<T>(selector)!;
 const brandImage = document.createElement('img');
@@ -33,8 +34,8 @@ document.querySelectorAll<HTMLElement>('.card').forEach(card => {
   card.replaceWith(link);
   link.append(card);
 });
-$<HTMLElement>('.section-heading .subtle').textContent = '/ 08 GAMES';
-document.querySelectorAll<HTMLElement>('.art-index').forEach((node, index) => { node.textContent = `${games[index].number} / 08`; });
+$<HTMLElement>('.section-heading .subtle').textContent = `/ ${String(games.length).padStart(2, '0')} GAMES`;
+document.querySelectorAll<HTMLElement>('.art-index').forEach((node, index) => { node.textContent = `${games[index].number} / ${String(games.length).padStart(2, '0')}`; });
 const expandButton = document.createElement('button');
 expandButton.type = 'button';
 expandButton.className = 'secondary';
@@ -56,6 +57,18 @@ const settings = $<HTMLDialogElement>('#settings'), audio = new ArcadeAudio();
 const music = $<HTMLInputElement>('#music'), effects = $<HTMLInputElement>('#effects'), theme = $<HTMLSelectElement>('#theme');
 const start = $<HTMLButtonElement>('#start'), pauseButton = $<HTMLButtonElement>('#pause');
 const boardMessage = $<HTMLElement>('#board-message');
+const flagButton = document.createElement('button');
+flagButton.type = 'button';
+flagButton.className = 'secondary';
+flagButton.hidden = true;
+flagButton.setAttribute('aria-pressed', 'false');
+document.querySelector('.game-side .dpad')!.before(flagButton);
+let flagMode = false;
+function renderFlagButton(): void {
+  flagButton.textContent = flagMode ? t('Flag mode: on', 'Tryb flag: włączony') : t('Flag mode: off', 'Tryb flag: wyłączony');
+  flagButton.setAttribute('aria-pressed', String(flagMode));
+}
+flagButton.addEventListener('click', () => { flagMode = !flagMode; renderFlagButton(); });
 const speedLabel = document.createElement('label');
 speedLabel.className = 'setting-row';
 speedLabel.innerHTML = '<span><strong>Game speed</strong><small>Applies to the next run</small></span><select aria-label="Game speed"><option value="slow">Slow</option><option value="medium" selected>Medium</option><option value="fast">Fast</option></select>';
@@ -156,7 +169,7 @@ music.onchange = () => { audio.music = music.checked; if (!music.checked) audio.
 effects.onchange = () => { audio.effects = effects.checked; if (!effects.checked) audio.stopEffects(); saveAudio(); };
 theme.onchange = () => account.setTheme(theme.value as Theme);
 let returnFocus: HTMLElement | null = null;
-document.querySelectorAll<HTMLButtonElement>('.settings-open').forEach(button => button.onclick = () => { returnFocus = button; pauseGame(); speedLabel.hidden = !gameId; mazeLabel.hidden = gameId !== 'labyrinth'; customLabel.hidden = gameId !== 'labyrinth' || mazeSelect.value !== 'custom'; lanesLabel.hidden = gameId !== 'frog-crossing'; lanesCustomLabel.hidden = gameId !== 'frog-crossing' || lanesSelect.value !== 'custom'; settings.showModal(); });
+document.querySelectorAll<HTMLButtonElement>('.settings-open').forEach(button => button.onclick = () => { returnFocus = button; pauseGame(); speedLabel.hidden = !gameId || gameId === 'minesweeper'; mazeLabel.hidden = gameId !== 'labyrinth'; customLabel.hidden = gameId !== 'labyrinth' || mazeSelect.value !== 'custom'; lanesLabel.hidden = gameId !== 'frog-crossing'; lanesCustomLabel.hidden = gameId !== 'frog-crossing' || lanesSelect.value !== 'custom'; settings.showModal(); });
 settings.addEventListener('close', () => returnFocus?.focus());
 let game: Game | null = null, gameId: GameId | null = null;
 let mode: 'ready' | 'playing' | 'paused' | 'ended' = 'ready';
@@ -171,7 +184,7 @@ function tick(now: number): void { if (mode !== 'playing' || !game) return; if (
 start.onclick = begin;
 pauseButton.onclick = () => mode === 'playing' ? pauseGame() : begin();
 $<HTMLButtonElement>('#replay').onclick = () => { resetGame(); begin(); };
-function navigate(): void { cancelAnimationFrame(frame); audio.stop(); release(); const id = location.hash.slice(6) as GameId; const selected = location.hash.startsWith('#game/') ? games.find(g => g.id === id) : undefined; gameId = selected?.id ?? null; picker.hidden = !!selected; gameView.hidden = !selected; if (selected) { $('#game-number').textContent = selected.number; resetGame(); } else { game = null; mode = 'ready'; } renderGameText(); window.scrollTo(0, 0); }
+function navigate(): void { cancelAnimationFrame(frame); audio.stop(); release(); const id = location.hash.slice(6) as GameId; const selected = location.hash.startsWith('#game/') ? games.find(g => g.id === id) : undefined; gameId = selected?.id ?? null; picker.hidden = !!selected; gameView.hidden = !selected; flagMode = false; flagButton.hidden = gameId !== 'minesweeper'; $<HTMLElement>('.dpad').hidden = gameId === 'minesweeper'; canvas.classList.toggle('mine-board', gameId === 'minesweeper'); renderFlagButton(); if (selected) { $('#game-number').textContent = selected.number; resetGame(); } else { game = null; mode = 'ready'; } renderGameText(); window.scrollTo(0, 0); }
 window.addEventListener('hashchange', navigate);
 const keyActions: Record<string, Action> = { ArrowUp: 'up', w: 'up', ArrowDown: 'down', s: 'down', ArrowLeft: 'left', a: 'left', ArrowRight: 'right', d: 'right' };
 function keyAction(event: KeyboardEvent): Action | undefined { return keyActions[event.key] ?? keyActions[event.key.toLowerCase()]; }
@@ -180,6 +193,24 @@ window.addEventListener('keydown', event => { const target = event.target as HTM
 window.addEventListener('keydown', event => { const target = event.target as HTMLElement; if (mode !== 'playing' || settings.open || /INPUT|TEXTAREA|SELECT/.test(target.tagName) || target.isContentEditable) return; const action = keyAction(event); if (!action) return; event.preventDefault(); if (!held.has(action)) { held.add(action); game?.input(action, true); } });
 window.addEventListener('keyup', event => { const action = keyAction(event); if (action && held.has(action)) { held.delete(action); game?.input(action, false); } });
 document.querySelectorAll<HTMLButtonElement>('[data-action]').forEach(button => { const action = button.dataset.action as Action; const end = () => { if (held.delete(action)) game?.input(action, false); button.classList.remove('pressed'); }; button.addEventListener('pointerdown', event => { if (mode !== 'playing') return; event.preventDefault(); button.setPointerCapture(event.pointerId); if (!held.has(action)) { held.add(action); game?.input(action, true); } button.classList.add('pressed'); }); button.addEventListener('pointerup', end); button.addEventListener('pointercancel', end); button.addEventListener('lostpointercapture', end); });
+canvas.addEventListener('contextmenu', event => { if (gameId === 'minesweeper') event.preventDefault(); });
+let boardPress: { id: number; x: number; y: number; flag: boolean } | null = null;
+canvas.addEventListener('pointerdown', event => {
+  if (gameId !== 'minesweeper' || mode !== 'playing' || (event.button !== 0 && event.button !== 2)) return;
+  event.preventDefault();
+  boardPress = { id: event.pointerId, x: event.clientX, y: event.clientY, flag: event.button === 2 || flagMode };
+  canvas.setPointerCapture(event.pointerId);
+});
+canvas.addEventListener('pointerup', event => {
+  const press = boardPress;
+  boardPress = null;
+  if (!press || press.id !== event.pointerId || mode !== 'playing' || Math.hypot(event.clientX - press.x, event.clientY - press.y) > 10) return;
+  const bounds = canvas.getBoundingClientRect();
+  const x = (event.clientX - bounds.left) * canvas.width / bounds.width;
+  const y = (event.clientY - bounds.top) * canvas.height / bounds.height;
+  if (x >= 0 && x < canvas.width && y >= 0 && y < canvas.height) game?.pointer?.(x, y, press.flag);
+});
+canvas.addEventListener('pointercancel', () => { boardPress = null; });
 window.addEventListener('blur', () => { pauseGame(); release(); });
 document.addEventListener('visibilitychange', () => { if (document.hidden) { pauseGame(); release(); } });
 const gameCopy: Record<GameId, { name: string; description: string; instructions: string }> = {
@@ -191,6 +222,7 @@ const gameCopy: Record<GameId, { name: string; description: string; instructions
   tetris: { name: 'Tetris', description: 'Układaj klocki i usuwaj pełne linie.', instructions: 'Przesuwaj klocki w lewo i prawo, obracaj w górę i przyspieszaj w dół. Wypełniaj linie.' },
   'pac-man': { name: 'Pac-Man', description: 'Zbieraj kropki i unikaj duchów.', instructions: 'Zbierz wszystkie kropki i unikaj duchów. Duże kropki pozwalają je zjadać przez chwilę.' },
   asteroids: { name: 'Asteroidy', description: 'Pilotuj statek przez pole asteroid.', instructions: 'Skręcaj w lewo i w prawo, przyspieszaj w górę i strzelaj w dół. Niszczenie asteroid daje punkty.' },
+  minesweeper: { name: 'Saper', description: 'Odkryj pole, nie trafiając na minę.', instructions: 'Odkryj wszystkie bezpieczne pola. Liczby wskazują sąsiednie miny.' },
 };
 function gameName(id: GameId): string {
   return t(games.find(g => g.id === id)!.name, gameCopy[id].name);
@@ -208,8 +240,13 @@ function renderGameText(): void {
       tetris: 'Move blocks left and right, rotate with up, and soft drop with down. Fill lines to clear them.',
       'pac-man': 'Collect every dot and avoid ghosts. Power pellets let you eat ghosts briefly.',
       asteroids: 'Turn left or right, thrust with up, and fire with down. Destroy asteroids to score.',
+      minesweeper: 'Reveal every safe square. Numbers count neighboring mines.',
     };
     $('#instructions').textContent = t(instructions[gameId], gameCopy[gameId].instructions);
+  flagButton.hidden = gameId !== 'minesweeper';
+  $<HTMLElement>('.game-side .hint').innerHTML = gameId === 'minesweeper'
+    ? t('Click or tap to reveal. Right-click or enable flag mode to mark mines.', 'Kliknij lub dotknij, aby odkryć pole. Kliknij prawym przyciskiem lub włącz tryb flag, aby oznaczać miny.')
+    : t('Use arrow keys or WASD.<br>On touch, use the buttons below.', 'Użyj strzałek lub klawiszy WASD.<br>Na ekranie dotykowym użyj przycisków poniżej.');
   }
   const won = game?.status === 'won';
   $('#message-label').textContent = mode === 'paused' ? t('TAKE A BREATHER', 'CHWILA PRZERWY') : mode === 'ended' ? (won ? t('WELL PLAYED', 'DOBRA GRA') : t('GAME OVER', 'KONIEC GRY')) : t('READY, PLAYER?', 'GOTOWY DO GRY?');
@@ -229,7 +266,7 @@ function renderLanguage(): void {
   stamp[0].textContent = t('INSERT', 'WRZUĆ'); stamp[1].textContent = t('JUST KIDDING ✳', 'ŻARTUJEMY ✳');
   text('.hero-stamp strong', 'COIN', 'MONETĘ');
   $<HTMLElement>('.section-heading .eyebrow').firstChild!.textContent = t('THE COLLECTION ', 'KOLEKCJA ');
-  text('.section-heading .subtle', '/ 08 GAMES', '/ 08 GIER');
+  text('.section-heading .subtle', `/ ${String(games.length).padStart(2, '0')} GAMES`, `/ ${String(games.length).padStart(2, '0')} GIER`);
   text('.section-heading h2', 'Choose your game', 'Wybierz grę');
   text('.section-note', 'GOOD GAMES, NO QUARTERS.', 'DOBRE GRY, BEZ MONET.');
   document.querySelectorAll<HTMLElement>('.card').forEach((card, index) => {
@@ -247,6 +284,7 @@ function renderLanguage(): void {
   text('.score-box .micro', 'SCORE', 'WYNIK');
   attr('canvas', 'aria-label', 'Game board', 'Plansza gry');
   text('#replay', 'New game', 'Nowa gra');
+  renderFlagButton();
   renderExpandButton();
   text('.game-side > .eyebrow', 'HOW TO PLAY', 'JAK GRAĆ');
   $('.game-side .hint').innerHTML = t('Use arrow keys or WASD.<br>On touch, use the buttons below.', 'Użyj strzałek lub klawiszy WASD.<br>Na ekranie dotykowym użyj przycisków poniżej.');

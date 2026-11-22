@@ -1,6 +1,6 @@
 # Pocket Arcade
 
-A browser arcade with Snake, Breakout, Lane Dodger, Labyrinth, Frog Crossing, Tetris, Pac-Man and Asteroids. Play as a guest or sign in to keep personal bests and a theme across devices. Scores are client-reported personal records, not competitive rankings.
+A browser arcade with Snake, Breakout, Lane Dodger, Labyrinth, Frog Crossing, Tetris, Pac-Man, Asteroids and Minesweeper. Play as a guest or sign in to keep personal bests and a theme across devices. Scores are client-reported personal records, not competitive rankings.
 
 ## Local development
 
@@ -13,7 +13,7 @@ npm run dev
 
 Open the URL printed by Vite. Accounts are optional: without Supabase configuration, guest play remains available. Guest records and settings are stored on the device when browser storage is available; otherwise they last only for the current session. Account records are separate, and importing guest records requires explicit approval.
 Choose English or Polish in Settings. The language is saved on the device when storage is available, otherwise for the current session.
-Every game offers Slow, Medium, and Fast speeds in its Settings dialog; changes made during a run apply to the next run. Medium is the default. Personal bests are shared across speeds.
+Action games offer Slow, Medium, and Fast speeds in their Settings dialog; changes made during a run apply to the next run. Medium is the default. Personal bests are shared across speeds.
 Press P or Escape during play to pause; use Resume to continue.
 Use Expand board to enlarge the game and move achievements and touch controls underneath; Smaller board restores the standard layout.
 Labyrinth's square maze size can be set from 5 to 50, with a default of 10; changes apply to the next run. Completing a maze earns 1000 points minus the number of moves, with a minimum score of 1. Personal bests are shared across maze sizes, and a score of 1 earns the Maze Explorer achievement.
@@ -22,6 +22,7 @@ In Tetris, move pieces left or right, rotate with Up, and soft drop with Down; t
 Lane Dodger awards achievements at 10, 50, 100, 200, 500 and 1000 vehicles passed. Tetris also awards achievements at 500, 5000, 20000 and 100000 points. Achievement progress is derived from each game's personal best and is shown in the player panel.
 In Pac-Man, use the arrow keys or touch controls to navigate the maze, collect pellets and avoid ghosts. Power pellets let you eat ghosts temporarily. Collect every pellet to win; a score of 100 earns the Maze Muncher achievement.
 In Asteroids, use Left and Right to rotate, Up to thrust, and hold Down to fire repeatedly; touch controls are also available. A score of 100 earns the Asteroid Breaker achievement.
+In Minesweeper, reveal all 85 safe squares on a 10×10 board with 15 mines; the first reveal is safe. Numbers count adjacent mines, and each revealed square scores one point. Click or tap to reveal; right-click or enable Flag mode to mark suspected mines. Flag mode supports touch screens.
 
 To run the local account backend, install a Docker-compatible runtime and start the Supabase stack:
 

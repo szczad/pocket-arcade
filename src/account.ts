@@ -21,6 +21,7 @@ const games: { id: GameId; name: () => string }[] = [
   { id: 'tetris', name: () => t('Tetris', 'Tetris') },
   { id: 'pac-man', name: () => t('Pac-Man', 'Pac-Man') },
   { id: 'asteroids', name: () => t('Asteroids', 'Asteroidy') },
+  { id: 'minesweeper', name: () => t('Minesweeper', 'Saper') },
 ];
 const storageKey = 'pocket-arcade.guest.v1';
 const isTheme = (value: unknown): value is Theme => value === 'midnight' || value === 'amber' || value === 'mint';
