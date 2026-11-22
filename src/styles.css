@@ -8,3 +8,6 @@
 .achievement-pane{border-top:0;margin-top:0;padding-top:0;margin-bottom:28px}.game-layout{align-items:flex-start}.game-title-row{height:76px}.game-side{padding-top:92px}
 @media(max-width:639px){.game-title-row{height:auto}.game-side{padding-top:0}}
 @media(max-height:500px) and (orientation:landscape){.game-title-row{height:27px}.game-side{padding-top:32px}}
+.game-layout.expanded{display:flex;flex-direction:column;align-items:flex-start;gap:24px}.game-layout.expanded .game-main{width:min(100%,900px)}.game-layout.expanded .board-wrap{width:100%;min-width:0}.game-layout.expanded .game-side{width:min(100%,900px);max-width:none;padding:0;display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:20px;align-items:start}.game-layout.expanded .achievement-pane{grid-column:1;grid-row:1;margin:0}.game-layout.expanded .dpad{grid-column:2;grid-row:1;margin:0}.game-layout.expanded .game-side>.eyebrow,.game-layout.expanded #instructions,.game-layout.expanded .hint,.game-layout.expanded .side-foot{grid-column:1 / -1}.game-layout.expanded .game-side>.eyebrow{margin-top:24px}
+@media(max-width:400px){.game-layout.expanded .dpad{grid-template-columns:repeat(3,44px);grid-template-rows:repeat(2,44px)}}
+.game-actions{flex-wrap:wrap}

@@ -21,6 +21,21 @@ app.innerHTML = `<div class="shell"><header class="topbar"><a class="brand" href
 const $ = <T extends Element>(selector: string) => app.querySelector<T>(selector)!;
 $<HTMLElement>('.section-heading .subtle').textContent = '/ 08 GAMES';
 document.querySelectorAll<HTMLElement>('.art-index').forEach((node, index) => { node.textContent = `${games[index].number} / 08`; });
+const expandButton = document.createElement('button');
+expandButton.type = 'button';
+expandButton.className = 'secondary';
+expandButton.setAttribute('aria-pressed', 'false');
+document.querySelector('.game-actions')!.append(expandButton);
+function renderExpandButton(): void {
+  const expanded = expandButton.getAttribute('aria-pressed') === 'true';
+  expandButton.textContent = expanded ? t('Smaller board', 'Zmniejsz planszę') : t('Expand board', 'Powiększ planszę');
+}
+expandButton.addEventListener('click', () => {
+  const expanded = expandButton.getAttribute('aria-pressed') !== 'true';
+  expandButton.setAttribute('aria-pressed', String(expanded));
+  document.querySelector('.game-layout')!.classList.toggle('expanded', expanded);
+  renderExpandButton();
+});
 const picker = $<HTMLElement>('#picker'), gameView = $<HTMLElement>('#game-view');
 const canvas = $<HTMLCanvasElement>('canvas'), ctx = canvas.getContext('2d')!;
 const settings = $<HTMLDialogElement>('#settings'), audio = new ArcadeAudio();
@@ -220,6 +235,7 @@ function renderLanguage(): void {
   text('.score-box .micro', 'SCORE', 'WYNIK');
   attr('canvas', 'aria-label', 'Game board', 'Plansza gry');
   text('#replay', 'New game', 'Nowa gra');
+  renderExpandButton();
   text('.game-side > .eyebrow', 'HOW TO PLAY', 'JAK GRAĆ');
   $('.game-side .hint').innerHTML = t('Use arrow keys or WASD.<br>On touch, use the buttons below.', 'Użyj strzałek lub klawiszy WASD.<br>Na ekranie dotykowym użyj przycisków poniżej.');
   attr('.dpad', 'aria-label', 'Directional controls', 'Sterowanie kierunkowe');
