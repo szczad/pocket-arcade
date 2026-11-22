@@ -240,7 +240,7 @@ export function createAccount(container: HTMLElement, onChange: (snapshot: Accou
     const version = epoch, userId = session.user.id;
     themeSaving = true;
     while (current(version, userId) && pendingTheme !== null) {
-      const value = pendingTheme;
+      const value: Theme = pendingTheme;
       const { error: failure } = await client.from('player_preferences').upsert({ user_id: userId, theme: value });
       if (!current(version, userId)) return;
       if (failure) { error = `Theme not saved: ${failure.message}`; break; }
@@ -253,7 +253,7 @@ export function createAccount(container: HTMLElement, onChange: (snapshot: Accou
     const version = epoch, userId = session.user.id;
     scoreSaving.add(id);
     while (current(version, userId) && pendingBests[id] !== undefined) {
-      const value = pendingBests[id]!;
+      const value: number = pendingBests[id]!;
       const { data, error: failure } = await client.rpc('save_personal_best', { p_game_id: id, p_score: value });
       if (!current(version, userId)) return;
       if (failure || !isScore(data)) { error = `Score not saved: ${failure?.message || 'Invalid server response'}`; break; }
