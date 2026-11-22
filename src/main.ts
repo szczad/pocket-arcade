@@ -306,7 +306,7 @@ function renderLanguage(): void {
   for (const [action, en, pl] of [['up', 'Up', 'Góra'], ['down', 'Down', 'Dół'], ['left', 'Left', 'Lewo'], ['right', 'Right', 'Prawo']]) attr(`[data-action="${action}"]`, 'aria-label', en, pl);
   $('.side-foot').innerHTML = t('TAKE YOUR TIME.<br>THE HIGH SCORE CAN WAIT.', 'GRAJ BEZ POŚPIECHU.<br>REKORD MOŻE POCZEKAĆ.');
   attr('.account-section', 'aria-label', 'Player account', 'Konto gracza');
-  text('footer > span:last-child', 'SMALL GAMES. BIG JOY.', 'MAŁE GRY. WIELKA RADOŚĆ.');
+  text('footer > span:nth-child(2)', 'SMALL GAMES. BIG JOY.', 'MAŁE GRY. WIELKA RADOŚĆ.');
   text('.dialog-head .eyebrow', 'MAKE IT YOURS', 'DOPASUJ DO SIEBIE');
   text('.dialog-head h2', 'Settings', 'Ustawienia');
   attr('.dialog-head button', 'aria-label', 'Close settings', 'Zamknij ustawienia');
