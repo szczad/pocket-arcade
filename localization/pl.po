@@ -820,3 +820,6 @@ msgstr "{value} pasów"
 msgctxt "road-lanes"
 msgid "Custom"
 msgstr "Własna liczba"
+
+msgid "NEXT"
+msgstr "NASTĘPNY"

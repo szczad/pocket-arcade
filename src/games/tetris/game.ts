@@ -1,3 +1,4 @@
+import { t } from '../../i18n';
 import { rect, type GameRenderer } from '../renderer';
 import type { Action, Game, Point } from '../types';
 
@@ -24,17 +25,22 @@ export class Tetris implements Game {
   private ticks = 0;
   private horizontalTicks = 0;
 
-  constructor() { this.spawn(); }
+  constructor() {
+    this.refillBag();
+    this.spawn();
+  }
+
+  private refillBag(): void {
+    this.bag = TETROMINOES.map((_, i) => i);
+    for (let i = this.bag.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [this.bag[i], this.bag[j]] = [this.bag[j], this.bag[i]];
+    }
+  }
 
   private spawn(): void {
-    if (this.bag.length === 0) {
-      this.bag = TETROMINOES.map((_, i) => i);
-      for (let i = this.bag.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [this.bag[i], this.bag[j]] = [this.bag[j], this.bag[i]];
-      }
-    }
     this.kind = this.bag.pop()!;
+    if (this.bag.length === 0) this.refillBag();
     this.cells = TETROMINOES[this.kind].cells.map(cell => ({ ...cell }));
     this.x = 3;
     this.y = 0;
@@ -119,20 +125,25 @@ export class Tetris implements Game {
       for (let col = 0; col < 10; col++) {
         rect(ctx, '#1c2940', 94 + col * 9, 10 + row * 9, 8, 8);
         const color = this.board[row][col];
-        if (color) this.block(ctx, col, row, color);
+        if (color) this.block(ctx, 94 + col * 9, 10 + row * 9, color);
       }
     }
     for (const cell of this.cells) {
-      if (this.y + cell.y >= 0) this.block(ctx, this.x + cell.x, this.y + cell.y, TETROMINOES[this.kind].color);
+      const row = this.y + cell.y;
+      if (row >= 0) this.block(ctx, 94 + (this.x + cell.x) * 9, 10 + row * 9, TETROMINOES[this.kind].color);
     }
     ctx.text('SCORE', 208, 35, { color: '#86e6c4', font: 'bold 10px monospace', align: 'left', baseline: 'top' });
     ctx.text(String(this.score), 208, 51, { color: '#f5cf73', font: 'bold 12px monospace', align: 'left', baseline: 'top' });
     ctx.text('LINES', 208, 82, { color: '#86e6c4', font: 'bold 10px monospace', align: 'left', baseline: 'top' });
     ctx.text(String(this.score / 100), 208, 98, { color: '#f5cf73', font: 'bold 12px monospace', align: 'left', baseline: 'top' });
+    ctx.text(t('NEXT'), 208, 128, { color: '#86e6c4', font: 'bold 10px monospace', align: 'left', baseline: 'top' });
+    rect(ctx, '#36455c', 208, 143, 54, 36);
+    rect(ctx, '#10192b', 209, 144, 52, 34);
+    const next = TETROMINOES[this.bag[this.bag.length - 1]];
+    for (const { x, y } of next.cells) this.block(ctx, 217 + x * 9, 152 + y * 9, next.color);
   }
 
-  private block(ctx: GameRenderer, col: number, row: number, color: string): void {
-    const x = 94 + col * 9, y = 10 + row * 9;
+  private block(ctx: GameRenderer, x: number, y: number, color: string): void {
     rect(ctx, color, x, y, 8, 8);
     rect(ctx, '#eef6db', x + 1, y + 1, 5, 1);
     rect(ctx, '#34465a', x + 1, y + 6, 6, 1);

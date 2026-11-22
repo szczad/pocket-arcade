@@ -807,3 +807,6 @@ msgstr "{value} lanes"
 msgctxt "road-lanes"
 msgid "Custom"
 msgstr "Custom"
+
+msgid "NEXT"
+msgstr "NEXT"
