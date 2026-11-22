@@ -18,9 +18,9 @@ const music = $<HTMLInputElement>('#music'), effects = $<HTMLInputElement>('#eff
 const start = $<HTMLButtonElement>('#start'), pauseButton = $<HTMLButtonElement>('#pause');
 const boardMessage = $<HTMLElement>('#board-message');
 const speedLabel = document.createElement('label');
-speedLabel.className = 'game-speed';
-speedLabel.innerHTML = 'GAME SPEED <span>(NEXT RUN)</span><select aria-label="Game speed"><option value="slow">Slow</option><option value="medium" selected>Medium</option><option value="fast">Fast</option></select>';
-$<HTMLElement>('.game-side').insertBefore(speedLabel, $('#instructions'));
+speedLabel.className = 'setting-row';
+speedLabel.innerHTML = '<span><strong>Game speed</strong><small>Applies to the next run</small></span><select aria-label="Game speed"><option value="slow">Slow</option><option value="medium" selected>Medium</option><option value="fast">Fast</option></select>';
+$<HTMLElement>('#storage-note').before(speedLabel);
 const speedSelect = speedLabel.querySelector<HTMLSelectElement>('select')!;
 speedSelect.addEventListener('change', () => { if (gameId && mode === 'ready') resetGame(); });
 let storageAvailable = true;
@@ -39,7 +39,7 @@ music.onchange = () => { audio.music = music.checked; if (!music.checked) audio.
 effects.onchange = () => { audio.effects = effects.checked; if (!effects.checked) audio.stopEffects(); saveAudio(); };
 theme.onchange = () => account.setTheme(theme.value as Theme);
 let returnFocus: HTMLElement | null = null;
-document.querySelectorAll<HTMLButtonElement>('.settings-open').forEach(button => button.onclick = () => { returnFocus = button; pauseGame(); settings.showModal(); });
+document.querySelectorAll<HTMLButtonElement>('.settings-open').forEach(button => button.onclick = () => { returnFocus = button; pauseGame(); speedLabel.hidden = !gameId; settings.showModal(); });
 settings.addEventListener('close', () => returnFocus?.focus());
 let game: Game | null = null, gameId: GameId | null = null;
 let mode: 'ready' | 'playing' | 'paused' | 'ended' = 'ready';
