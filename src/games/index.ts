@@ -1,4 +1,4 @@
-export type GameId = 'snake' | 'breakout' | 'lane-dodger' | 'labyrinth' | 'frog-crossing' | 'tetris';
+export type GameId = 'snake' | 'breakout' | 'lane-dodger' | 'labyrinth' | 'frog-crossing' | 'tetris' | 'pac-man';
 export type Action = 'up' | 'down' | 'left' | 'right';
 export type SnakeSpeed = 'slow' | 'medium' | 'fast';
 export interface Game {
@@ -605,6 +605,172 @@ class Tetris implements Game {
   }
 }
 
+type PacGhost = {
+  position: Point;
+  home: Point;
+  direction: Action;
+  color: string;
+  respawn: number;
+};
+
+const PAC_DIRECTIONS: Record<Action, Point> = {
+  up: { x: 0, y: -1 },
+  down: { x: 0, y: 1 },
+  left: { x: -1, y: 0 },
+  right: { x: 1, y: 0 },
+};
+const PAC_ACTIONS: Action[] = ['up', 'left', 'down', 'right'];
+const PAC_OPPOSITE: Record<Action, Action> = {
+  up: 'down', down: 'up', left: 'right', right: 'left',
+};
+
+class PacMan implements Game {
+  score = 0;
+  status: Game['status'] = 'playing';
+  private readonly size = 15;
+  // Every odd row connects to its neighbors through multiple vertical corridors.
+  private readonly pellets = Array.from({ length: this.size }, (_, y) =>
+    Array.from({ length: this.size }, (_, x) => {
+      if (this.wall(x, y) || (x === 7 && y === 11)) return 0;
+      return (x === 1 || x === 13) && (y === 1 || y === 13) ? 2 : 1;
+    }),
+  );
+  private remaining = this.pellets.reduce((total, row) => total + row.filter(Boolean).length, 0);
+  private player: Point = { x: 7, y: 11 };
+  private direction: Action = 'left';
+  private requested: Action = 'left';
+  private ticks = 0;
+  private power = 0;
+  private ghosts: PacGhost[] = [
+    { position: { x: 7, y: 7 }, home: { x: 7, y: 7 }, direction: 'left', color: '#ff6078', respawn: 0 },
+    { position: { x: 5, y: 7 }, home: { x: 5, y: 7 }, direction: 'up', color: '#ff9bd1', respawn: 0 },
+    { position: { x: 9, y: 7 }, home: { x: 9, y: 7 }, direction: 'down', color: '#69dfe9', respawn: 0 },
+  ];
+
+  private wall(x: number, y: number): boolean {
+    return x <= 0 || y <= 0 || x >= this.size - 1 || y >= this.size - 1
+      || (x % 2 === 0 && y % 2 === 0)
+      || ((y === 4 || y === 10) && (x === 3 || x === 7 || x === 11));
+  }
+
+  private next(position: Point, direction: Action): Point {
+    const delta = PAC_DIRECTIONS[direction];
+    return { x: position.x + delta.x, y: position.y + delta.y };
+  }
+
+  input(action: Action, pressed: boolean): void {
+    if (pressed) this.requested = action;
+  }
+
+  private collide(): void {
+    for (const ghost of this.ghosts) {
+      if (ghost.respawn || ghost.position.x !== this.player.x || ghost.position.y !== this.player.y) continue;
+      if (this.power > 0) {
+        this.score += 200;
+        ghost.position = { ...ghost.home };
+        ghost.respawn = 90;
+      } else {
+        this.status = 'lost';
+        return;
+      }
+    }
+  }
+
+  step(): void {
+    if (this.status !== 'playing') return;
+    this.ticks++;
+    if (this.power > 0) this.power--;
+    for (const ghost of this.ghosts) {
+      if (ghost.respawn > 0) ghost.respawn--;
+    }
+    this.collide();
+    if (this.status !== 'playing') return;
+
+    if (this.ticks % 8 === 0) {
+      const turn = this.next(this.player, this.requested);
+      if (!this.wall(turn.x, turn.y)) this.direction = this.requested;
+      const next = this.next(this.player, this.direction);
+      if (!this.wall(next.x, next.y)) this.player = next;
+      const pellet = this.pellets[this.player.y][this.player.x];
+      if (pellet) {
+        this.pellets[this.player.y][this.player.x] = 0;
+        this.remaining--;
+        this.score += pellet === 2 ? 50 : 10;
+        if (pellet === 2) this.power = 360;
+      }
+      this.collide();
+      if (this.status !== 'playing') return;
+      if (this.remaining === 0) {
+        this.status = 'won';
+        return;
+      }
+    }
+
+    if (this.ticks % 10 === 0) {
+      for (const ghost of this.ghosts) {
+        if (ghost.respawn) continue;
+        const available = PAC_ACTIONS.filter(action => {
+          const next = this.next(ghost.position, action);
+          return !this.wall(next.x, next.y);
+        });
+        const forward = available.filter(action => action !== PAC_OPPOSITE[ghost.direction]);
+        const options = forward.length ? forward : available;
+        options.sort((a, b) => {
+          const first = this.next(ghost.position, a);
+          const second = this.next(ghost.position, b);
+          const distance = (point: Point) => Math.abs(point.x - this.player.x) + Math.abs(point.y - this.player.y);
+          return (distance(first) - distance(second)) * (this.power > 0 ? -1 : 1);
+        });
+        ghost.direction = options[0];
+        ghost.position = this.next(ghost.position, ghost.direction);
+        this.collide();
+        if (this.status !== 'playing') return;
+      }
+    }
+  }
+
+  draw(ctx: CanvasRenderingContext2D): void {
+    rect(ctx, '#090d25', 0, 0, 240, 240);
+    for (let y = 0; y < this.size; y++) {
+      for (let x = 0; x < this.size; x++) {
+        const px = x * 16;
+        const py = y * 16;
+        if (this.wall(x, y)) {
+          rect(ctx, '#293b9b', px, py, 16, 16);
+          rect(ctx, '#465dcc', px + 2, py + 2, 12, 2);
+          rect(ctx, '#1a286f', px + 2, py + 12, 12, 2);
+        } else if (this.pellets[y][x] === 2) {
+          rect(ctx, '#fff0b5', px + 5, py + 5, 6, 6);
+        } else if (this.pellets[y][x] === 1) {
+          rect(ctx, '#f9dca5', px + 7, py + 7, 2, 2);
+        }
+      }
+    }
+    for (const ghost of this.ghosts) {
+      if (ghost.respawn) continue;
+      const x = ghost.position.x * 16;
+      const y = ghost.position.y * 16;
+      const color = this.power > 0 ? '#626de0' : ghost.color;
+      rect(ctx, color, x + 4, y + 2, 8, 2);
+      rect(ctx, color, x + 2, y + 4, 12, 8);
+      rect(ctx, color, x + 2, y + 12, 4, 2);
+      rect(ctx, color, x + 8, y + 12, 4, 2);
+      rect(ctx, '#ffffff', x + 4, y + 6, 3, 3);
+      rect(ctx, '#ffffff', x + 9, y + 6, 3, 3);
+      rect(ctx, '#202650', x + 5, y + 7, 2, 2);
+      rect(ctx, '#202650', x + 10, y + 7, 2, 2);
+    }
+    const x = this.player.x * 16;
+    const y = this.player.y * 16;
+    rect(ctx, '#ffdc47', x + 4, y + 2, 8, 12);
+    rect(ctx, '#ffdc47', x + 2, y + 4, 12, 8);
+    if (Math.floor(this.ticks / 8) % 2 === 0) {
+      const mouth = PAC_DIRECTIONS[this.direction];
+      rect(ctx, '#090d25', x + 7 + mouth.x * 4, y + 7 + mouth.y * 4, mouth.x ? 5 : 2, mouth.y ? 5 : 2);
+    }
+  }
+}
+
 export function createGame(id: GameId, snakeSpeed: SnakeSpeed = 'medium', mazeSize = 10, frogLanes = 5): Game {
   switch (id) {
     case 'snake': return new Snake({ slow: 16, medium: 8, fast: 4 }[snakeSpeed]);
@@ -613,5 +779,6 @@ export function createGame(id: GameId, snakeSpeed: SnakeSpeed = 'medium', mazeSi
     case 'labyrinth': return new Labyrinth(mazeSize);
     case 'frog-crossing': return new FrogCrossing(frogLanes);
     case 'tetris': return new Tetris();
+    case 'pac-man': return new PacMan();
   }
 }
