@@ -1,0 +1,813 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=utf-8\n"
+"Language: pl\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 "
+"|| n%100>14) ? 1 : 2);\n"
+
+msgid "Signed in as {player}"
+msgstr "Zalogowano jako {player}"
+
+msgid "{game}: device {score}, account {accountScore}"
+msgstr "{game}: urządzenie {score}, konto {accountScore}"
+
+msgid "Snake"
+msgstr "Wąż"
+
+msgid "Breakout"
+msgstr "Breakout"
+
+msgid "Lane Dodger"
+msgstr "Unik na drodze"
+
+msgid "Labyrinth"
+msgstr "Labirynt"
+
+msgid "Frog Crossing"
+msgstr "Żabia przeprawa"
+
+msgid "Tetris"
+msgstr "Tetris"
+
+msgid "Pac-Man"
+msgstr "Pac-Man"
+
+msgid "Asteroids"
+msgstr "Asteroidy"
+
+msgid "Minesweeper"
+msgstr "Saper"
+
+msgid "Scorched Earth"
+msgstr "Spalona ziemia"
+
+msgid "← Back to arcade"
+msgstr "← Wróć do salonu"
+
+msgid "Account"
+msgstr "Konto"
+
+msgid "Accounts are unavailable. You can still play as a guest."
+msgstr "Konta są niedostępne. Nadal możesz grać jako gość."
+
+msgid "Play as a guest or log in to keep your records across devices."
+msgstr ""
+"Graj jako gość lub zaloguj się, aby zachować rekordy na różnych urządzeniach."
+
+msgid "Log in"
+msgstr "Zaloguj się"
+
+msgid "Please wait…"
+msgstr "Proszę czekać…"
+
+msgid "Continue with Google"
+msgstr "Kontynuuj przez Google"
+
+msgid "Cancel"
+msgstr "Anuluj"
+
+msgid "player"
+msgstr "gracz"
+
+msgid "Loading account records…"
+msgstr "Wczytywanie rekordów konta…"
+
+msgid "Retry loading records"
+msgstr "Ponów wczytywanie rekordów"
+
+msgid "Records & achievements"
+msgstr "Rekordy i osiągnięcia"
+
+msgid " (not saved)"
+msgstr " (nie zapisano)"
+
+msgid "Not played"
+msgstr "Jeszcze nie grano"
+
+msgid "Personal best"
+msgstr "Rekord"
+
+msgid "Reset stats"
+msgstr "Resetuj statystyki"
+
+msgid "Theme change not saved."
+msgstr "Zmiana motywu nie została zapisana."
+
+msgid "Retry saving"
+msgstr "Ponów zapisywanie"
+
+msgid "Import device records"
+msgstr "Importuj rekordy z urządzenia"
+
+msgid "Import device records?"
+msgstr "Importować rekordy z urządzenia?"
+
+msgid ""
+"Only higher scores count. Successfully imported device records will be "
+"removed from this device. Your theme will not be imported."
+msgstr ""
+"Liczą się tylko wyższe wyniki. Pomyślnie zaimportowane rekordy zostaną "
+"usunięte z tego urządzenia. Motyw nie zostanie zaimportowany."
+
+msgid "Unavailable"
+msgstr "Niedostępny"
+
+msgid "Merging…"
+msgstr "Łączenie…"
+
+msgid "Merge records"
+msgstr "Połącz rekordy"
+
+msgid "Not now"
+msgstr "Nie teraz"
+
+msgid "Delete account"
+msgstr "Usuń konto"
+
+msgid "Log out"
+msgstr "Wyloguj się"
+
+msgid ""
+"Device storage is unavailable; guest records and preferences are session-"
+"only."
+msgstr ""
+"Pamięć urządzenia jest niedostępna; rekordy i ustawienia gościa zostaną "
+"zachowane tylko do końca sesji."
+
+msgid "Reset all personal bests and achievements? This cannot be undone."
+msgstr ""
+"Zresetować wszystkie rekordy i osiągnięcia? Tej operacji nie można cofnąć."
+
+msgid "Guest stats reset on this device."
+msgstr "Statystyki gościa na tym urządzeniu zostały zresetowane."
+
+msgid "Account stats reset."
+msgstr "Statystyki konta zostały zresetowane."
+
+msgid "Could not reset stats. Please try again."
+msgstr "Nie udało się zresetować statystyk. Spróbuj ponownie."
+
+msgid ""
+"Delete your account, records, and preferences permanently? This cannot be "
+"undone."
+msgstr ""
+"Trwale usunąć konto, rekordy i ustawienia? Tej operacji nie można cofnąć."
+
+msgid "Could not delete account. Please try again."
+msgstr "Nie udało się usunąć konta. Spróbuj ponownie."
+
+msgid "Account deleted."
+msgstr "Konto zostało usunięte."
+
+msgid "Could not start Google sign-in. Please try again."
+msgstr "Nie udało się rozpocząć logowania przez Google. Spróbuj ponownie."
+
+msgid "Could not log out."
+msgstr "Nie udało się wylogować."
+
+msgid "Could not load account records. Retry loading when you are online."
+msgstr ""
+"Nie udało się wczytać rekordów konta. Spróbuj ponownie po połączeniu z "
+"internetem."
+
+msgid "Theme not saved."
+msgstr "Motyw nie został zapisany."
+
+msgid "Score not saved."
+msgstr "Wynik nie został zapisany."
+
+msgid "Some records could not be imported. Please retry merging."
+msgstr "Nie udało się zaimportować niektórych rekordów. Ponów łączenie."
+
+msgid "Device records merged."
+msgstr "Rekordy z urządzenia zostały połączone."
+
+msgid "Orchard Keeper"
+msgstr "Strażnik sadu"
+
+msgid "Score 50 points in Snake."
+msgstr "Zdobądź 50 punktów w Wężu."
+
+msgid "Wall Breaker"
+msgstr "Pogromca murów"
+
+msgid "Score 120 points in Breakout."
+msgstr "Zdobądź 120 punktów w Breakout."
+
+msgid "Clear Road"
+msgstr "Wolna droga"
+
+msgid "Pass 10 vehicles."
+msgstr "Miń 10 pojazdów."
+
+msgid "Road Regular"
+msgstr "Stały bywalec drogi"
+
+msgid "Pass 50 vehicles."
+msgstr "Miń 50 pojazdów."
+
+msgid "Highway Driver"
+msgstr "Kierowca szosy"
+
+msgid "Pass 100 vehicles."
+msgstr "Miń 100 pojazdów."
+
+msgid "Traffic Expert"
+msgstr "Ekspert ruchu"
+
+msgid "Pass 200 vehicles."
+msgstr "Miń 200 pojazdów."
+
+msgid "Road Veteran"
+msgstr "Weteran szosy"
+
+msgid "Pass 500 vehicles."
+msgstr "Miń 500 pojazdów."
+
+msgid "Road Legend"
+msgstr "Legenda szosy"
+
+msgid "Pass 1000 vehicles."
+msgstr "Miń 1000 pojazdów."
+
+msgid "Maze Explorer"
+msgstr "Odkrywca labiryntu"
+
+msgid "Score 1 point in Labyrinth."
+msgstr "Zdobądź 1 punkt w Labiryncie."
+
+msgid "River Bound"
+msgstr "Przez rzekę"
+
+msgid "Score 1 point in Frog Crossing."
+msgstr "Zdobądź 1 punkt w Żabiej przeprawie."
+
+msgid "Line Builder"
+msgstr "Budowniczy linii"
+
+msgid "Score 100 points in Tetris."
+msgstr "Zdobądź 100 punktów w Tetrisie."
+
+msgid "Block Stacker"
+msgstr "Układacz klocków"
+
+msgid "Score 500 points in Tetris."
+msgstr "Zdobądź 500 punktów w Tetrisie."
+
+msgid "Line Master"
+msgstr "Mistrz linii"
+
+msgid "Score 5000 points in Tetris."
+msgstr "Zdobądź 5000 punktów w Tetrisie."
+
+msgid "Block Expert"
+msgstr "Ekspert klocków"
+
+msgid "Score 20000 points in Tetris."
+msgstr "Zdobądź 20000 punktów w Tetrisie."
+
+msgid "Tetris Legend"
+msgstr "Legenda Tetrisa"
+
+msgid "Score 100000 points in Tetris."
+msgstr "Zdobądź 100000 punktów w Tetrisie."
+
+msgid "Maze Muncher"
+msgstr "Pożeracz labiryntu"
+
+msgid "Score 100 points in Pac-Man."
+msgstr "Zdobądź 100 punktów w Pac-Manie."
+
+msgid "Asteroid Breaker"
+msgstr "Pogromca asteroid"
+
+msgid "Score 100 points in Asteroids."
+msgstr "Zdobądź 100 punktów w Asteroidach."
+
+msgid "Earned"
+msgstr "Zdobyto"
+
+msgid "Locked"
+msgstr "Zablokowano"
+
+msgid "EARNED"
+msgstr "ZDOBYTO"
+
+msgid "LOCKED"
+msgstr "ZABLOKOWANO"
+
+msgid "Legal information"
+msgstr "Informacje prawne"
+
+msgid "Privacy policy"
+msgstr "Polityka prywatności"
+
+msgid "Terms of use"
+msgstr "Warunki korzystania"
+
+msgid ""
+"\n"
+"      <h2>Information we use</h2><p>Endless Loop provides Pocket Arcade. You "
+"can play without an account. Guest best scores, theme, language and audio "
+"settings may be stored in your browser. If browser storage is unavailable, "
+"these preferences and records last only for the session.</p>\n"
+"      <p>If you sign in with Google, Google handles authentication and "
+"Supabase provides account services. The app uses your account identifier and "
+"email address, and stores your account theme and personal best scores. "
+"Achievements are derived from those scores. Guest scores are transferred to "
+"your account only if you choose to merge them.</p>\n"
+"      <h2>How information is used and shared</h2><p>We use this information "
+"to provide sign-in, remember preferences and save your records across "
+"devices. Vercel hosts the application; Supabase provides authentication and "
+"database services; Google provides sign-in. These services may process "
+"technical information such as IP addresses and request logs under their own "
+"policies.</p>\n"
+"      <h2>Storage and your choices</h2><p>You can play as a guest, sign out, "
+"or clear browser storage to remove locally stored guest records and "
+"preferences. Clearing browser data may also sign you out. Account records "
+"remain associated with your account; deleting an account deletes its "
+"associated records. Browser storage is also used to maintain your sign-in "
+"session.</p>\n"
+"      <h2>GDPR rights</h2><p>Where the EU General Data Protection Regulation "
+"(GDPR) applies, you may have the right to access, correct or erase your "
+"personal data, restrict or object to processing, and receive portable data. "
+"These rights are subject to legal conditions and exceptions. Where "
+"processing relies on consent, you may withdraw it at any time without "
+"affecting earlier processing.</p>\n"
+"      <p>You may also lodge a complaint with a data protection supervisory "
+"authority, including the authority in your EU country of residence or work. "
+"In Poland, this is the <a href=\"https://uodo.gov.pl/\">President of the "
+"Personal Data Protection Office (UODO)</a>.</p>\n"
+"      <p>Privacy rights, retention periods and international transfers "
+"depend on applicable law and the configuration of our service providers. "
+"This policy may be updated as the service changes.</p>"
+msgstr ""
+"\n"
+"      <h2>Wykorzystywane informacje</h2><p>Endless Loop udostępnia Pocket "
+"Arcade. Możesz grać bez konta. Rekordy gościa, motyw, język i ustawienia "
+"dźwięku mogą być zapisane w przeglądarce. Jeśli pamięć przeglądarki jest "
+"niedostępna, ustawienia i rekordy pozostają tylko na czas sesji.</p>\n"
+"      <p>Jeśli zalogujesz się przez Google, Google obsługuje "
+"uwierzytelnianie, a Supabase usługi konta. Aplikacja używa identyfikatora i "
+"adresu e-mail konta oraz zapisuje motyw i rekordy konta. Osiągnięcia "
+"wynikają z rekordów. Rekordy gościa są przenoszone na konto tylko po "
+"wybraniu połączenia.</p>\n"
+"      <h2>Wykorzystanie i udostępnianie informacji</h2><p>Informacje służą "
+"do logowania, zapamiętywania ustawień i przechowywania rekordów na różnych "
+"urządzeniach. Vercel hostuje aplikację; Supabase zapewnia uwierzytelnianie i "
+"bazę danych; Google zapewnia logowanie. Usługi te mogą przetwarzać dane "
+"techniczne, takie jak adresy IP i dzienniki żądań, zgodnie z własnymi "
+"zasadami.</p>\n"
+"      <h2>Przechowywanie i Twoje wybory</h2><p>Możesz grać jako gość, "
+"wylogować się lub wyczyścić pamięć przeglądarki, aby usunąć lokalne rekordy "
+"i ustawienia gościa. Wyczyszczenie danych przeglądarki może również "
+"wylogować Cię z konta. Rekordy konta pozostają z nim powiązane; usunięcie "
+"konta usuwa powiązane rekordy. Pamięć przeglądarki służy także do utrzymania "
+"sesji logowania.</p>\n"
+"      <h2>Prawa wynikające z RODO</h2><p>Jeżeli ma zastosowanie ogólne "
+"rozporządzenie o ochronie danych (RODO), możesz mieć prawo dostępu do danych "
+"osobowych, ich sprostowania lub usunięcia, ograniczenia przetwarzania, "
+"wniesienia sprzeciwu oraz przenoszenia danych. Prawa te podlegają warunkom i "
+"wyjątkom przewidzianym przez prawo. Jeżeli przetwarzanie opiera się na "
+"zgodzie, możesz ją w każdej chwili wycofać bez wpływu na wcześniejsze "
+"przetwarzanie.</p>\n"
+"      <p>Możesz także wnieść skargę do organu nadzorczego ochrony danych, w "
+"tym w kraju UE, w którym mieszkasz lub pracujesz. W Polsce jest nim <a "
+"href=\"https://uodo.gov.pl/\">Prezes Urzędu Ochrony Danych Osobowych (UODO)</"
+"a>.</p>\n"
+"      <p>Prawa do prywatności, okresy przechowywania i przekazywanie danych "
+"za granicę zależą od obowiązującego prawa i konfiguracji dostawców usług. "
+"Polityka może być aktualizowana wraz ze zmianami usługi.</p>"
+
+msgid ""
+"\n"
+"      <h2>Using Pocket Arcade</h2><p>Pocket Arcade is provided by Endless "
+"Loop. You may play as a guest or sign in using an available provider. You "
+"are responsible for your account and for complying with applicable laws when "
+"using the service.</p>\n"
+"      <h2>Fair use</h2><p>Do not disrupt the service, attempt unauthorized "
+"access, interfere with other users, or use it unlawfully. Personal bests are "
+"client-reported and are not competitive rankings.</p>\n"
+"      <h2>Availability and content</h2><p>Games, features and account "
+"services may change or become unavailable. Keep your own copies of anything "
+"important; records may be lost. The service is provided as available, "
+"without guarantees of uninterrupted operation, to the extent permitted by "
+"law. Nothing in these terms limits rights that cannot legally be excluded.</"
+"p>\n"
+"      <h2>Changes</h2><p>Endless Loop may update these terms as the service "
+"changes. The current terms are available here. You may stop using the "
+"service if you do not accept them.</p>"
+msgstr ""
+"\n"
+"      <h2>Korzystanie z Pocket Arcade</h2><p>Pocket Arcade jest udostępniane "
+"przez Endless Loop. Możesz grać jako gość lub zalogować się za pośrednictwem "
+"dostępnego dostawcy. Odpowiadasz za swoje konto i przestrzeganie "
+"obowiązującego prawa podczas korzystania z usługi.</p>\n"
+"      <h2>Uczciwe korzystanie</h2><p>Nie zakłócaj działania usługi, nie "
+"próbuj uzyskać nieuprawnionego dostępu, nie przeszkadzaj innym użytkownikom "
+"ani nie korzystaj z usługi niezgodnie z prawem. Rekordy są zgłaszane przez "
+"klienta i nie stanowią rankingu rywalizacyjnego.</p>\n"
+"      <h2>Dostępność i treści</h2><p>Gry, funkcje i usługi konta mogą się "
+"zmieniać lub stać niedostępne. Zachowuj własne kopie ważnych danych; rekordy "
+"mogą zostać utracone. Usługa jest udostępniana w dostępnej postaci, bez "
+"gwarancji nieprzerwanego działania, w zakresie dozwolonym przez prawo. "
+"Warunki te nie ograniczają praw, których nie można wyłączyć zgodnie z prawem."
+"</p>\n"
+"      <h2>Zmiany</h2><p>Endless Loop może aktualizować warunki wraz ze "
+"zmianami usługi. Aktualne warunki są dostępne tutaj. Jeśli ich nie "
+"akceptujesz, możesz przestać korzystać z usługi.</p>"
+
+msgid "Close"
+msgstr "Zamknij"
+
+msgid "Gather fruit. Grow longer. Stay sharp."
+msgstr "Zbieraj owoce. Rośnij. Zachowaj czujność."
+
+msgid "Collect fruit to grow. Avoid the walls and your own tail."
+msgstr "Zbieraj owoce, aby rosnąć. Unikaj ścian i własnego ogona."
+
+msgid "Clear the wall, one brick at a time."
+msgstr "Rozbij mur, cegła po cegle."
+
+msgid "Move the paddle to keep the ball in play and clear every brick."
+msgstr "Poruszaj paletką, aby odbijać piłkę i rozbić wszystkie cegły."
+
+msgid "Pick a lane and keep the road clear."
+msgstr "Wybierz pas i omijaj pojazdy."
+
+msgid "Change lanes to avoid traffic. Every car you pass earns a point."
+msgstr ""
+"Zmieniaj pasy, aby unikać pojazdów. Za każdy ominięty samochód zdobywasz "
+"punkt."
+
+msgid "Find your way through the maze."
+msgstr "Znajdź drogę przez labirynt."
+
+msgid "Find the gold exit. Fewer moves earn a higher score."
+msgstr "Znajdź złote wyjście. Mniej ruchów oznacza więcej punktów."
+
+msgid "Cross the road and ride logs to the far bank."
+msgstr "Przejdź przez drogę i przepłyń rzekę na kłodach."
+
+msgid "Avoid traffic, hop onto logs, and reach the far bank."
+msgstr "Unikaj pojazdów, wskakuj na kłody i dotrzyj na drugi brzeg."
+
+msgid "Stack blocks and clear complete lines."
+msgstr "Układaj klocki i usuwaj pełne linie."
+
+msgid ""
+"Move blocks left and right, rotate with up, and soft drop with down. Fill "
+"lines to clear them."
+msgstr ""
+"Przesuwaj klocki w lewo i prawo, obracaj w górę i przyspieszaj w dół. "
+"Wypełniaj linie."
+
+msgid "Eat the dots and dodge the ghosts."
+msgstr "Zbieraj kropki i unikaj duchów."
+
+msgid ""
+"Collect every dot and avoid ghosts. Power pellets let you eat ghosts briefly."
+msgstr ""
+"Zbierz wszystkie kropki i unikaj duchów. Duże kropki pozwalają je zjadać "
+"przez chwilę."
+
+msgid "Pilot your ship through an asteroid field."
+msgstr "Pilotuj statek przez pole asteroid."
+
+msgid ""
+"Turn left or right, thrust with up, and fire with down. Destroy asteroids to "
+"score."
+msgstr ""
+"Skręcaj w lewo i w prawo, przyspieszaj w górę i strzelaj w dół. Niszczenie "
+"asteroid daje punkty."
+
+msgid "Clear the field without setting off a mine."
+msgstr "Odkryj pole, nie trafiając na minę."
+
+msgid "Reveal every safe square. Numbers count neighboring mines."
+msgstr "Odkryj wszystkie bezpieczne pola. Liczby wskazują sąsiednie miny."
+
+msgid "Aim, fire and outlast the enemy tank."
+msgstr "Celuj, strzelaj i pokonaj wrogi czołg."
+
+msgid ""
+"Duel the computer. Up and down adjust angle; left and right adjust power. "
+"Account for the wind and hit the enemy tank."
+msgstr ""
+"Walcz z komputerem. Góra i dół zmieniają kąt, lewo i prawo siłę strzału. "
+"Traf przeciwnika, uwzględniając wiatr."
+
+msgid "Smaller board"
+msgstr "Zmniejsz planszę"
+
+msgid "Expand board"
+msgstr "Powiększ planszę"
+
+msgid "Flag mode: on"
+msgstr "Tryb flag: włączony"
+
+msgid "Flag mode: off"
+msgstr "Tryb flag: wyłączony"
+
+msgid "ACHIEVEMENTS"
+msgstr "OSIĄGNIĘCIA"
+
+msgid ""
+"Device storage unavailable; guest data and preferences last for this session "
+"only."
+msgstr ""
+"Pamięć urządzenia jest niedostępna; dane gościa i ustawienia zostaną "
+"zachowane tylko podczas tej sesji."
+
+msgid "Account ↗"
+msgstr "Konto ↗"
+
+msgid "Account / Log in ↗"
+msgstr "Konto / Zaloguj się ↗"
+
+msgid "Click or tap to reveal. Right-click or enable flag mode to mark mines."
+msgstr ""
+"Kliknij lub dotknij, aby odkryć pole. Kliknij prawym przyciskiem lub włącz "
+"tryb flag, aby oznaczać miny."
+
+msgid ""
+"Use arrow keys or WASD to aim. Press Space or Fire to shoot; touch controls "
+"are below."
+msgstr ""
+"Celuj strzałkami lub klawiszami WASD. Naciśnij spację lub Strzał, aby "
+"wystrzelić; sterowanie dotykowe jest poniżej."
+
+msgid "Use arrow keys or WASD.<br>On touch, use the buttons below."
+msgstr ""
+"Użyj strzałek lub klawiszy WASD.<br>Na ekranie dotykowym użyj przycisków "
+"poniżej."
+
+msgid "TAKE A BREATHER"
+msgstr "CHWILA PRZERWY"
+
+msgid "WELL PLAYED"
+msgstr "DOBRA GRA"
+
+msgid "GAME OVER"
+msgstr "KONIEC GRY"
+
+msgid "READY, PLAYER?"
+msgstr "GOTOWY DO GRY?"
+
+msgid "Paused."
+msgstr "Pauza."
+
+msgid "You won!"
+msgstr "Wygrana!"
+
+msgid "Nice run."
+msgstr "Dobra gra."
+
+msgid "Let's play."
+msgstr "Zagrajmy."
+
+msgid "RESUME "
+msgstr "WZNÓW "
+
+msgid "PLAY AGAIN "
+msgstr "ZAGRAJ PONOWNIE "
+
+msgid "START GAME "
+msgstr "ROZPOCZNIJ GRĘ "
+
+msgid "Resume"
+msgstr "Wznów"
+
+msgid "Pause"
+msgstr "Pauza"
+
+msgid "Pocket Arcade home"
+msgstr "Pocket Arcade — strona główna"
+
+msgid "Open settings"
+msgstr "Otwórz ustawienia"
+
+msgid "Settings"
+msgstr "Ustawienia"
+
+msgid " YOUR LITTLE CORNER OF PLAY"
+msgstr " TWÓJ MAŁY ZAKĄTEK GRY"
+
+msgid "A little play goes a long way.<br>Pick a cartridge and beat your best."
+msgstr "Odrobina zabawy wiele zmienia.<br>Wybierz grę i pobij swój rekord."
+
+msgid "INSERT"
+msgstr "WRZUĆ"
+
+msgid "JUST KIDDING ✳"
+msgstr "ŻARTUJEMY ✳"
+
+msgid "COIN"
+msgstr "MONETĘ"
+
+msgid "THE COLLECTION "
+msgstr "KOLEKCJA "
+
+msgid "/ {arg0} GAMES"
+msgstr "/ {arg0} GIER"
+
+msgid "Choose your game"
+msgstr "Wybierz grę"
+
+msgid "GOOD GAMES, NO QUARTERS."
+msgstr "DOBRE GRY, BEZ MONET."
+
+msgid "PERSONAL BEST"
+msgstr "REKORD OSOBISTY"
+
+msgid "Play {arg0}"
+msgstr "Zagraj: {arg0}"
+
+msgid "MADE FOR A LITTLE BREAK."
+msgstr "STWORZONE NA MAŁĄ PRZERWĘ."
+
+msgid "★  PLAY AT YOUR OWN PACE"
+msgstr "★  GRAJ WE WŁASNYM TEMPIE"
+
+msgid "←   BACK TO ARCADE"
+msgstr "←   WRÓĆ DO ARCADE"
+
+msgid "NOW PLAYING "
+msgstr "TERAZ GRASZ "
+
+msgid "SCORE"
+msgstr "WYNIK"
+
+msgid "Game board"
+msgstr "Plansza gry"
+
+msgid "New game"
+msgstr "Nowa gra"
+
+msgid "Fire"
+msgstr "Strzał"
+
+msgid "HOW TO PLAY"
+msgstr "JAK GRAĆ"
+
+msgid "Directional controls"
+msgstr "Sterowanie kierunkowe"
+
+msgid "Up"
+msgstr "Góra"
+
+msgid "Down"
+msgstr "Dół"
+
+msgid "Left"
+msgstr "Lewo"
+
+msgid "Right"
+msgstr "Prawo"
+
+msgid "TAKE YOUR TIME.<br>THE HIGH SCORE CAN WAIT."
+msgstr "GRAJ BEZ POŚPIECHU.<br>REKORD MOŻE POCZEKAĆ."
+
+msgid "Player account"
+msgstr "Konto gracza"
+
+msgid "SMALL GAMES. BIG JOY."
+msgstr "MAŁE GRY. WIELKA RADOŚĆ."
+
+msgid "MAKE IT YOURS"
+msgstr "DOPASUJ DO SIEBIE"
+
+msgid "Close settings"
+msgstr "Zamknij ustawienia"
+
+msgid "Music"
+msgstr "Muzyka"
+
+msgid "A little soundtrack for your game"
+msgstr "Muzyka towarzysząca grze"
+
+msgid "Sound effects"
+msgstr "Efekty dźwiękowe"
+
+msgid "Sounds for points and game over"
+msgstr "Dźwięki punktów i końca gry"
+
+msgid "Theme"
+msgstr "Motyw"
+
+msgid "Pick your cabinet colors"
+msgstr "Wybierz kolory automatu"
+
+msgid "Midnight"
+msgstr "Północ"
+
+msgid "Amber"
+msgstr "Bursztyn"
+
+msgid "Mint"
+msgstr "Mięta"
+
+msgid "Language"
+msgstr "Język"
+
+msgid "Choose your language"
+msgstr "Wybierz język"
+
+msgid "Game speed"
+msgstr "Prędkość gry"
+
+msgid "Applies to the next run"
+msgstr "Dotyczy następnej rozgrywki"
+
+msgid "Slow"
+msgstr "Wolno"
+
+msgid "Medium"
+msgstr "Średnio"
+
+msgid "Fast"
+msgstr "Szybko"
+
+msgid "Difficulty"
+msgstr "Poziom trudności"
+
+msgid "Easy"
+msgstr "Łatwy"
+
+msgid "Hard"
+msgstr "Trudny"
+
+msgid "Maze size"
+msgstr "Rozmiar labiryntu"
+
+msgid "Custom"
+msgstr "Własny"
+
+msgid "Custom size"
+msgstr "Własny rozmiar"
+
+msgid "Square maze, 5–50 cells per side"
+msgstr "Kwadratowy labirynt, 5–50 pól na bok"
+
+msgid "Custom maze size"
+msgstr "Własny rozmiar labiryntu"
+
+msgid "Road lanes"
+msgstr "Pasy ruchu"
+
+msgid "{value} lanes"
+msgstr "{value} pasy"
+
+msgid "Custom lanes"
+msgstr "Własna liczba pasów"
+
+msgid "1–15 road lanes"
+msgstr "1–15 pasów ruchu"
+
+msgid "Custom road lanes"
+msgstr "Własna liczba pasów ruchu"
+
+msgid "DONE "
+msgstr "GOTOWE "
+
+msgid "YOU"
+msgstr "TY"
+
+msgid "WIND"
+msgstr "WIATR"
+
+msgid "ANGLE"
+msgstr "KĄT"
+
+msgid "POWER"
+msgstr "SIŁA"
+
+msgid "YOUR TURN"
+msgstr "TWÓJ RUCH"
+
+msgid "CPU TURN"
+msgstr "RUCH CPU"
+
+msgctxt "game-picker"
+msgid "Lane Dodger"
+msgstr "Unikaj pojazdów"
+
+msgctxt "game-picker"
+msgid "Frog Crossing"
+msgstr "Przeprawa żaby"
+
+msgctxt "game-picker"
+msgid "Scorched Earth"
+msgstr "Scorched Earth"
+
+msgctxt "difficulty"
+msgid "Medium"
+msgstr "Średni"
+
+msgctxt "road-lanes-plural"
+msgid "{value} lanes"
+msgstr "{value} pasów"
+
+msgctxt "road-lanes"
+msgid "Custom"
+msgstr "Własna liczba"

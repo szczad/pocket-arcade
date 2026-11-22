@@ -13,16 +13,16 @@ export interface AccountSnapshot {
 }
 
 const games: { id: GameId; name: () => string }[] = [
-  { id: 'snake', name: () => t('Snake', 'Wąż') },
-  { id: 'breakout', name: () => t('Breakout', 'Breakout') },
-  { id: 'lane-dodger', name: () => t('Lane Dodger', 'Unik na drodze') },
-  { id: 'labyrinth', name: () => t('Labyrinth', 'Labirynt') },
-  { id: 'frog-crossing', name: () => t('Frog Crossing', 'Żabia przeprawa') },
-  { id: 'tetris', name: () => t('Tetris', 'Tetris') },
-  { id: 'pac-man', name: () => t('Pac-Man', 'Pac-Man') },
-  { id: 'asteroids', name: () => t('Asteroids', 'Asteroidy') },
-  { id: 'minesweeper', name: () => t('Minesweeper', 'Saper') },
-  { id: 'scorched-earth', name: () => t('Scorched Earth', 'Spalona ziemia') },
+  { id: 'snake', name: () => t('Snake') },
+  { id: 'breakout', name: () => t('Breakout') },
+  { id: 'lane-dodger', name: () => t('Lane Dodger') },
+  { id: 'labyrinth', name: () => t('Labyrinth') },
+  { id: 'frog-crossing', name: () => t('Frog Crossing') },
+  { id: 'tetris', name: () => t('Tetris') },
+  { id: 'pac-man', name: () => t('Pac-Man') },
+  { id: 'asteroids', name: () => t('Asteroids') },
+  { id: 'minesweeper', name: () => t('Minesweeper') },
+  { id: 'scorched-earth', name: () => t('Scorched Earth') },
 ];
 const storageKey = 'pocket-arcade.guest.v1';
 const isTheme = (value: unknown): value is Theme => value === 'midnight' || value === 'amber' || value === 'mint';
@@ -110,81 +110,81 @@ export function createAccount(container: HTMLElement, onChange: (snapshot: Accou
   }
   function render() {
     container.replaceChildren();
-    const back = element('a', t('← Back to arcade', '← Wróć do salonu'));
+    const back = element('a', t('← Back to arcade'));
     back.href = '#';
     back.className = 'account-back';
     container.append(back);
-    const heading = element('h1', t('Account', 'Konto'));
+    const heading = element('h1', t('Account'));
     container.append(heading);
     if (!client) {
-      container.append(element('p', t('Accounts are unavailable. You can still play as a guest.', 'Konta są niedostępne. Nadal możesz grać jako gość.')));
+      container.append(element('p', t('Accounts are unavailable. You can still play as a guest.')));
     } else if (!session) {
-      container.append(element('p', t('Play as a guest or log in to keep your records across devices.', 'Graj jako gość lub zaloguj się, aby zachować rekordy na różnych urządzeniach.')));
-      if (!loginOpen) container.append(button(t('Log in', 'Zaloguj się'), () => { loginOpen = true; error = ''; notice = ''; update(); }));
+      container.append(element('p', t('Play as a guest or log in to keep your records across devices.')));
+      if (!loginOpen) container.append(button(t('Log in'), () => { loginOpen = true; error = ''; notice = ''; update(); }));
       else {
-        container.append(button(busy ? t('Please wait…', 'Proszę czekać…') : t('Continue with Google', 'Kontynuuj przez Google'), () => { void signInWithGoogle(); }, busy));
-        container.append(button(t('Cancel', 'Anuluj'), () => { loginOpen = false; error = ''; notice = ''; update(); }, busy));
+        container.append(button(busy ? t('Please wait…') : t('Continue with Google'), () => { void signInWithGoogle(); }, busy));
+        container.append(button(t('Cancel'), () => { loginOpen = false; error = ''; notice = ''; update(); }, busy));
       }
     } else {
-      container.append(element('p', t(`Signed in as ${session.user.email || 'player'}`, `Zalogowano jako ${session.user.email || 'gracz'}`)));
-      if (loading) container.append(element('p', t('Loading account records…', 'Wczytywanie rekordów konta…')));
-      if (loadFailed && !loading) container.append(button(t('Retry loading records', 'Ponów wczytywanie rekordów'), () => { error = ''; void retrySaves(); }));
+      container.append(element('p', t('Signed in as {player}', { player: session.user.email || t('player') })));
+      if (loading) container.append(element('p', t('Loading account records…')));
+      if (loadFailed && !loading) container.append(button(t('Retry loading records'), () => { error = ''; void retrySaves(); }));
     }
     const stats = element('section');
     stats.className = 'account-stats';
-    stats.append(element('h2', t('Records & achievements', 'Rekordy i osiągnięcia')));
+    stats.append(element('h2', t('Records & achievements')));
     for (const game of games) {
       const score = bests[game.id];
-      const pending = pendingBests[game.id] !== undefined ? t(' (not saved)', ' (nie zapisano)') : '';
-      const result = score === undefined ? t('Not played', 'Jeszcze nie grano') : score;
+      const pending = pendingBests[game.id] !== undefined ? t(' (not saved)') : '';
+      const result = score === undefined ? t('Not played') : score;
       const row = element('section');
       row.className = 'account-game';
-      row.append(element('h3', game.name()), element('p', `${t('Personal best', 'Rekord')}: ${result}${pending}`));
+      row.append(element('h3', game.name()), element('p', `${t('Personal best')}: ${result}${pending}`));
       const items = achievements[game.id];
       if (items?.length) row.append(achievementIcons(items, score));
       stats.append(row);
     }
     container.append(stats);
-    container.append(button(t('Reset stats', 'Resetuj statystyki'), () => { void resetStats(); }, busy || loading || importBusy || scoreSaving.size > 0));
+    container.append(button(t('Reset stats'), () => { void resetStats(); }, busy || loading || importBusy || scoreSaving.size > 0));
     if (session) {
-      if (pendingTheme !== null) container.append(element('p', t('Theme change not saved.', 'Zmiana motywu nie została zapisana.')));
+      if (pendingTheme !== null) container.append(element('p', t('Theme change not saved.')));
       if (pendingTheme !== null || games.some(({ id }) => pendingBests[id] !== undefined)) {
-        container.append(button(t('Retry saving', 'Ponów zapisywanie'), () => { error = ''; void retrySaves(); }, busy));
+        container.append(button(t('Retry saving'), () => { error = ''; void retrySaves(); }, busy));
       }
       if (!importOpen && games.some(({ id }) => guest.bests[id] !== undefined)) {
-        container.append(button(t('Import device records', 'Importuj rekordy z urządzenia'), () => { offerImport(); update(); }, busy));
+        container.append(button(t('Import device records'), () => { offerImport(); update(); }, busy));
       }
       if (importOpen) {
         const section = element('section');
-        section.append(element('h3', t('Import device records?', 'Importować rekordy z urządzenia?')));
-        section.append(element('p', t('Only higher scores count. Successfully imported device records will be removed from this device. Your theme will not be imported.', 'Liczą się tylko wyższe wyniki. Pomyślnie zaimportowane rekordy zostaną usunięte z tego urządzenia. Motyw nie zostanie zaimportowany.')));
+        section.append(element('h3', t('Import device records?')));
+        section.append(element('p', t('Only higher scores count. Successfully imported device records will be removed from this device. Your theme will not be imported.')));
         const choices = element('ul');
         for (const game of games) {
           const score = importOffer[game.id];
           if (score !== undefined) {
-            const accountScore = loading || loadFailed ? t('Unavailable', 'Niedostępny') : bests[game.id] ?? t('Not played', 'Jeszcze nie grano');
-            choices.append(element('li', t(`${game.name()}: device ${score}, account ${accountScore}`, `${game.name()}: urządzenie ${score}, konto ${accountScore}`)));
+            const accountScore = loading || loadFailed ? t('Unavailable') : bests[game.id] ?? t('Not played');
+            choices.append(element('li', t('{game}: device {score}, account {accountScore}', { game: game.name(), score, accountScore })));
           }
         }
-        section.append(choices, button(importBusy ? t('Merging…', 'Łączenie…') : t('Merge records', 'Połącz rekordy'), () => { void mergeRecords(); }, busy || importBusy || loading || loadFailed),
-          button(t('Not now', 'Nie teraz'), () => { importOpen = false; update(); }, busy || importBusy));
+        section.append(choices, button(importBusy ? t('Merging…') : t('Merge records'), () => { void mergeRecords(); }, busy || importBusy || loading || loadFailed),
+          button(t('Not now'), () => { importOpen = false; update(); }, busy || importBusy));
         container.append(section);
       }
-      container.append(button(t('Delete account', 'Usuń konto'), () => { void deleteAccount(); }, busy || loading || importBusy || scoreSaving.size > 0));
-      container.append(button(t('Log out', 'Wyloguj się'), () => { void logout(); }, busy));
+      container.append(button(t('Delete account'), () => { void deleteAccount(); }, busy || loading || importBusy || scoreSaving.size > 0));
+      container.append(button(t('Log out'), () => { void logout(); }, busy));
     }
-    if (!storage) container.append(element('p', t('Device storage is unavailable; guest records and preferences are session-only.', 'Pamięć urządzenia jest niedostępna; rekordy i ustawienia gościa zostaną zachowane tylko do końca sesji.')));
+    if (!storage) container.append(element('p', t('Device storage is unavailable; guest records and preferences are session-only.')));
     if (notice) { const message = element('p', typeof notice === 'function' ? notice() : notice); message.setAttribute('role', 'status'); container.append(message); }
     if (error) { const message = element('p', typeof error === 'function' ? error() : error); message.setAttribute('role', 'alert'); container.append(message); }
   }
 
   async function resetStats() {
     if (busy || loading || importBusy || scoreSaving.size) return;
-    if (!window.confirm(t('Reset all personal bests and achievements? This cannot be undone.', 'Zresetować wszystkie rekordy i osiągnięcia? Tej operacji nie można cofnąć.'))) return;
+    if (!window.confirm(t('Reset all personal bests and achievements? This cannot be undone.'))) return;
     error = ''; notice = '';
     if (!session) {
       guest.bests = {}; bests = {}; persistGuest();
-      notice = () => t('Guest stats reset on this device.', 'Statystyki gościa na tym urządzeniu zostały zresetowane.');
+      notice = () => t('Guest stats reset on this device.');
       update();
       return;
     }
@@ -196,9 +196,9 @@ export function createAccount(container: HTMLElement, onChange: (snapshot: Accou
       if (!current(version, userId)) return;
       if (failure) throw failure;
       bests = {}; pendingBests = {};
-      notice = () => t('Account stats reset.', 'Statystyki konta zostały zresetowane.');
+      notice = () => t('Account stats reset.');
     } catch {
-      if (current(version, userId)) error = () => t('Could not reset stats. Please try again.', 'Nie udało się zresetować statystyk. Spróbuj ponownie.');
+      if (current(version, userId)) error = () => t('Could not reset stats. Please try again.');
     } finally {
       if (current(version, userId)) { busy = false; update(); }
     }
@@ -206,7 +206,7 @@ export function createAccount(container: HTMLElement, onChange: (snapshot: Accou
 
   async function deleteAccount() {
     if (!client || !session || busy || loading || importBusy || scoreSaving.size) return;
-    if (!window.confirm(t('Delete your account, records, and preferences permanently? This cannot be undone.', 'Trwale usunąć konto, rekordy i ustawienia? Tej operacji nie można cofnąć.'))) return;
+    if (!window.confirm(t('Delete your account, records, and preferences permanently? This cannot be undone.'))) return;
     const version = epoch, userId = session.user.id;
     busy = true; error = ''; notice = ''; update();
     let failure;
@@ -214,12 +214,12 @@ export function createAccount(container: HTMLElement, onChange: (snapshot: Accou
     catch { failure = true; }
     if (!current(version, userId)) return;
     if (failure) {
-      error = () => t('Could not delete account. Please try again.', 'Nie udało się usunąć konta. Spróbuj ponownie.');
+      error = () => t('Could not delete account. Please try again.');
       busy = false; update(); return;
     }
     try { await client.auth.signOut({ scope: 'local' }); } catch { /* The account is already deleted. */ }
     if (current(version, userId)) applySession(null);
-    notice = () => t('Account deleted.', 'Konto zostało usunięte.');
+    notice = () => t('Account deleted.');
     if (!disposed) { busy = false; update(); }
   }
   async function signInWithGoogle() {
@@ -230,9 +230,9 @@ export function createAccount(container: HTMLElement, onChange: (snapshot: Accou
         provider: 'google',
         options: { redirectTo: `${window.location.origin}${window.location.pathname}` },
       });
-      if (failure) error = () => t('Could not start Google sign-in. Please try again.', 'Nie udało się rozpocząć logowania przez Google. Spróbuj ponownie.');
+      if (failure) error = () => t('Could not start Google sign-in. Please try again.');
     } catch {
-      error = () => t('Could not start Google sign-in. Please try again.', 'Nie udało się rozpocząć logowania przez Google. Spróbuj ponownie.');
+      error = () => t('Could not start Google sign-in. Please try again.');
     }
     if (!disposed) { busy = false; update(); }
   }
@@ -243,7 +243,7 @@ export function createAccount(container: HTMLElement, onChange: (snapshot: Accou
     const { error: failure } = await client.auth.signOut({ scope: 'local' });
     if (disposed) return;
     busy = false;
-    if (failure && version === epoch) error = () => t('Could not log out.', 'Nie udało się wylogować.');
+    if (failure && version === epoch) error = () => t('Could not log out.');
     update();
   }
   async function loadAccount(version: number, userId: string) {
@@ -256,7 +256,7 @@ export function createAccount(container: HTMLElement, onChange: (snapshot: Accou
     if (!current(version, userId)) return;
     loading = false;
     if (preferences.error || records.error) {
-      error = () => t('Could not load account records. Retry loading when you are online.', 'Nie udało się wczytać rekordów konta. Spróbuj ponownie po połączeniu z internetem.');
+      error = () => t('Could not load account records. Retry loading when you are online.');
       loadFailed = true;
     } else {
       loadFailed = false;
@@ -283,7 +283,7 @@ export function createAccount(container: HTMLElement, onChange: (snapshot: Accou
       const value: Theme = pendingTheme;
       const { error: failure } = await client.from('player_preferences').upsert({ user_id: userId, theme: value });
       if (!current(version, userId)) return;
-      if (failure) { error = () => t('Theme not saved.', 'Motyw nie został zapisany.'); break; }
+      if (failure) { error = () => t('Theme not saved.'); break; }
       if (pendingTheme === value) pendingTheme = null;
     }
     if (current(version, userId)) { themeSaving = false; update(); }
@@ -296,7 +296,7 @@ export function createAccount(container: HTMLElement, onChange: (snapshot: Accou
       const value: number = pendingBests[id]!;
       const { data, error: failure } = await client.rpc('save_personal_best', { p_game_id: id, p_score: value });
       if (!current(version, userId)) return;
-      if (failure || !isScore(data)) { error = () => t('Score not saved.', 'Wynik nie został zapisany.'); break; }
+      if (failure || !isScore(data)) { error = () => t('Score not saved.'); break; }
       bests[id] = Math.max(bests[id] ?? 0, data);
       if (pendingBests[id] === value) delete pendingBests[id];
     }
@@ -324,8 +324,8 @@ export function createAccount(container: HTMLElement, onChange: (snapshot: Accou
     }
     importBusy = false;
     importOpen = games.some(({ id }) => importOffer[id] !== undefined);
-    if (failed) error = () => t('Some records could not be imported. Please retry merging.', 'Nie udało się zaimportować niektórych rekordów. Ponów łączenie.');
-    else notice = () => t('Device records merged.', 'Rekordy z urządzenia zostały połączone.');
+    if (failed) error = () => t('Some records could not be imported. Please retry merging.');
+    else notice = () => t('Device records merged.');
     update();
   }
   function applySession(next: Session | null) {

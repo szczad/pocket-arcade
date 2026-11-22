@@ -42,6 +42,12 @@ npm run build
 npm run preview -- --host 127.0.0.1
 ```
 
+## Translation and rendering
+
+English source messages and Polish translations are catalogued in `localization/en.po` and `localization/pl.po`. Add new English message IDs in code with `t('...')` and add corresponding entries to both catalogs. English falls back to the message ID; Polish uses `msgstr`, falling back to English when missing or fuzzy. Preserve `msgctxt` and named `{placeholders}` when editing translations. Vite compiles the PO files during development and builds; no translation service is needed at runtime.
+
+Games draw in logical 240×240 coordinates through the `GameRenderer` interface in `src/games/renderer.ts`. `src/games/canvas-renderer.ts` is the Canvas 2D backend; game implementations use renderer primitives rather than browser canvas APIs.
+
 ## Hosted Supabase and Vercel
 
 Provision or select an authorized Supabase project and Vercel project before deploying. The repository does not include credentials or a deployed URL.

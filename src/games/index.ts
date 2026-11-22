@@ -1,4 +1,5 @@
 import { t } from '../i18n';
+import type { GameRenderer } from './renderer';
 
 export type GameId = 'snake' | 'breakout' | 'lane-dodger' | 'labyrinth' | 'frog-crossing' | 'tetris' | 'pac-man' | 'asteroids' | 'minesweeper' | 'scorched-earth';
 export type Action = 'up' | 'down' | 'left' | 'right';
@@ -8,15 +9,14 @@ export interface Game {
   pointer?(x: number, y: number, flag: boolean): void;
   fire?(): void;
   step(): void;
-  draw(ctx: CanvasRenderingContext2D): void;
+  draw(ctx: GameRenderer): void;
   score: number;
   status: 'playing' | 'won' | 'lost';
 }
 
 type Point = { x: number; y: number };
-const rect = (ctx: CanvasRenderingContext2D, color: string, x: number, y: number, w: number, h: number) => {
-  ctx.fillStyle = color;
-  ctx.fillRect(Math.round(x), Math.round(y), w, h);
+const rect = (ctx: GameRenderer, color: string, x: number, y: number, w: number, h: number) => {
+  ctx.rectangle(color, Math.round(x), Math.round(y), w, h);
 };
 
 class Snake implements Game {
@@ -68,7 +68,7 @@ class Snake implements Game {
     }
   }
 
-  draw(ctx: CanvasRenderingContext2D): void {
+  draw(ctx: GameRenderer): void {
     rect(ctx, '#172c37', 0, 0, 240, 240);
     for (let y = 0; y < 20; y++) for (let x = 0; x < 20; x++) {
       if ((x + y) % 2 === 0) rect(ctx, '#1c3540', x * 12, y * 12, 12, 12);
@@ -148,7 +148,7 @@ class Breakout implements Game {
     }
   }
 
-  draw(ctx: CanvasRenderingContext2D): void {
+  draw(ctx: GameRenderer): void {
     rect(ctx, '#181b39', 0, 0, 240, 240);
     rect(ctx, '#343660', 0, 0, 240, 5);
     rect(ctx, '#343660', 0, 0, 4, 240);
@@ -207,7 +207,7 @@ class LaneDodger implements Game {
     }
   }
 
-  draw(ctx: CanvasRenderingContext2D): void {
+  draw(ctx: GameRenderer): void {
     rect(ctx, '#203844', 0, 0, 240, 240);
     rect(ctx, '#343a54', 30, 0, 180, 240);
     rect(ctx, '#f5cf73', 32, 0, 4, 240);
@@ -217,7 +217,7 @@ class LaneDodger implements Game {
     this.car(ctx, this.lane, 190, '#86e6c4', '#398f86');
   }
 
-  private car(ctx: CanvasRenderingContext2D, lane: number, y: number, color: string, shade: string): void {
+  private car(ctx: GameRenderer, lane: number, y: number, color: string, shade: string): void {
     const x = 47 + lane * 60;
     rect(ctx, '#151d31', x - 3, y + 5, 32, 6);
     rect(ctx, '#151d31', x - 3, y + 21, 32, 6);
@@ -307,7 +307,7 @@ class Labyrinth implements Game {
     }
   }
 
-  draw(ctx: CanvasRenderingContext2D): void {
+  draw(ctx: GameRenderer): void {
     rect(ctx, '#18142e', 0, 0, 240, 240);
     const cell = 232 / this.size;
     const edge = (n: number) => Math.round(4 + n * cell);
@@ -316,11 +316,10 @@ class Labyrinth implements Game {
       const left = edge(x), top = edge(y), right = edge(x + 1), bottom = edge(y + 1);
       rect(ctx, (x + y) % 2 ? '#302947' : '#382e4d', left, top, right - left, bottom - top);
       const passages = this.passages[y * this.size + x];
-      ctx.fillStyle = '#a96e82';
-      if (!(passages & 1)) ctx.fillRect(left, top, right - left + wall, wall);
-      if (!(passages & 8)) ctx.fillRect(left, top, wall, bottom - top + wall);
-      if (x === this.size - 1) ctx.fillRect(right, top, wall, bottom - top + wall);
-      if (y === this.size - 1) ctx.fillRect(left, bottom, right - left + wall, wall);
+      if (!(passages & 1)) ctx.rectangle('#a96e82', left, top, right - left + wall, wall);
+      if (!(passages & 8)) ctx.rectangle('#a96e82', left, top, wall, bottom - top + wall);
+      if (x === this.size - 1) ctx.rectangle('#a96e82', right, top, wall, bottom - top + wall);
+      if (y === this.size - 1) ctx.rectangle('#a96e82', left, bottom, right - left + wall, wall);
       if (this.size <= 20 && !(passages & 1)) {
         rect(ctx, '#e5a292', left + wall, top, Math.max(1, Math.floor((right - left) / 3)), 1);
       }
@@ -417,7 +416,7 @@ class FrogCrossing implements Game {
     this.checkCollision();
   }
 
-  draw(ctx: CanvasRenderingContext2D): void {
+  draw(ctx: GameRenderer): void {
     const height = 240 / (this.lanes + 4);
     rect(ctx, '#343a54', 0, 0, 240, 240);
     rect(ctx, '#477b55', 0, 0, 240, Math.ceil(height));
@@ -577,7 +576,7 @@ class Tetris implements Game {
     }
   }
 
-  draw(ctx: CanvasRenderingContext2D): void {
+  draw(ctx: GameRenderer): void {
     rect(ctx, '#171e34', 0, 0, 240, 240);
     // A lit cabinet surrounds the ten-column well.
     rect(ctx, '#36455c', 62, 6, 116, 228);
@@ -601,7 +600,7 @@ class Tetris implements Game {
     rect(ctx, '#f08083', 198, 196, 22, 4);
   }
 
-  private block(ctx: CanvasRenderingContext2D, col: number, row: number, color: string): void {
+  private block(ctx: GameRenderer, col: number, row: number, color: string): void {
     const x = 65 + col * 11, y = 9 + row * 11;
     rect(ctx, color, x, y, 10, 10);
     rect(ctx, '#eef6db', x + 1, y + 1, 7, 1);
@@ -733,7 +732,7 @@ class PacMan implements Game {
     }
   }
 
-  draw(ctx: CanvasRenderingContext2D): void {
+  draw(ctx: GameRenderer): void {
     rect(ctx, '#090d25', 0, 0, 240, 240);
     for (let y = 0; y < this.size; y++) {
       for (let x = 0; x < this.size; x++) {
@@ -888,7 +887,7 @@ class Asteroids implements Game {
     if (this.rocks.length === 0) this.nextWave();
   }
 
-  draw(ctx: CanvasRenderingContext2D): void {
+  draw(ctx: GameRenderer): void {
     rect(ctx, '#10182e', 0, 0, 240, 240);
     for (let i = 0; i < 32; i++) {
       const x = (i * 79 + 13) % 240, y = (i * 113 + 19) % 240;
@@ -908,7 +907,6 @@ class Asteroids implements Game {
       this.drawWrapped(ctx, bullet.x, bullet.y, () => rect(ctx, '#ffe39a', -2, -2, 4, 4));
     }
     this.drawWrapped(ctx, this.ship.x, this.ship.y, () => {
-      ctx.rotate(this.ship.angle + Math.PI / 2);
       if (this.held.has('up') && this.ticks % 8 < 5) {
         rect(ctx, '#ff7d80', -3, 7, 6, 6);
         rect(ctx, '#f5cf73', -1, 8, 2, 7);
@@ -919,16 +917,13 @@ class Asteroids implements Game {
       rect(ctx, '#398f86', -7, 5, 4, 4);
       rect(ctx, '#398f86', 3, 5, 4, 4);
       rect(ctx, '#203844', -2, -3, 4, 4);
-    });
+    }, this.ship.angle + Math.PI / 2);
   }
 
-  private drawWrapped(ctx: CanvasRenderingContext2D, x: number, y: number, draw: () => void): void {
+  private drawWrapped(ctx: GameRenderer, x: number, y: number, draw: () => void, angle = 0): void {
     for (const dx of [-240, 0, 240]) for (const dy of [-240, 0, 240]) {
       if (x + dx < -20 || x + dx > 260 || y + dy < -20 || y + dy > 260) continue;
-      ctx.save();
-      ctx.translate(Math.round(x + dx), Math.round(y + dy));
-      draw();
-      ctx.restore();
+      ctx.transformed(Math.round(x + dx), Math.round(y + dy), angle, draw);
     }
   }
 }
@@ -997,7 +992,7 @@ class Minesweeper implements Game {
     return count;
   }
 
-  draw(ctx: CanvasRenderingContext2D): void {
+  draw(ctx: GameRenderer): void {
     const colors = ['', '#75c9f0', '#86e6a7', '#ff8f83', '#c6a7f3', '#ffd47c', '#70ded1', '#f2a8c9', '#f5e9d2'];
     rect(ctx, '#18142e', 0, 0, 240, 240);
     for (let i = 0; i < 100; i++) {
@@ -1013,11 +1008,9 @@ class Minesweeper implements Game {
         } else {
           const count = this.neighborCount(i);
           if (count) {
-            ctx.fillStyle = colors[count];
-            ctx.font = 'bold 16px monospace';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(String(count), x + 12, y + 13);
+            ctx.text(String(count), x + 12, y + 13, {
+              color: colors[count], font: 'bold 16px monospace', align: 'center', baseline: 'middle',
+            });
           }
         }
       } else {
@@ -1187,7 +1180,7 @@ class ScorchedEarth implements Game {
     this.power = Math.max(25, Math.min(100, this.power + (this.held.has('right') ? 0.5 : 0) - (this.held.has('left') ? 0.5 : 0)));
   }
 
-  draw(ctx: CanvasRenderingContext2D): void {
+  draw(ctx: GameRenderer): void {
     rect(ctx, '#171b38', 0, 0, 240, 240);
     rect(ctx, '#283353', 0, 106, 240, 30);
     rect(ctx, '#36415b', 15, 117, 32, 3);
@@ -1204,12 +1197,7 @@ class ScorchedEarth implements Game {
       const color = i === 0 ? '#86e6c4' : '#ff8883';
       const radians = (i === 0 ? this.angle : 45) * Math.PI / 180;
       const direction = i === 0 ? 1 : -1;
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(tank.x, y - 2);
-      ctx.lineTo(tank.x + direction * Math.cos(radians) * 9, y - 2 - Math.sin(radians) * 9);
-      ctx.stroke();
+      ctx.line(color, 3, tank.x, y - 2, tank.x + direction * Math.cos(radians) * 9, y - 2 - Math.sin(radians) * 9);
       rect(ctx, '#202737', tank.x - 7, y + 1, 14, 4);
       rect(ctx, color, tank.x - 6, y - 4, 12, 6);
       rect(ctx, color, tank.x - 3, y - 7, 6, 3);
@@ -1220,20 +1208,13 @@ class ScorchedEarth implements Game {
       rect(ctx, '#ff8883', this.blast.x - radius, this.blast.y - radius / 2, radius * 2, radius);
       rect(ctx, '#ffe39a', this.blast.x - radius / 2, this.blast.y - radius, radius, radius * 2);
     }
-    ctx.font = 'bold 9px monospace';
-    ctx.textBaseline = 'top';
-    ctx.textAlign = 'left';
-    ctx.fillStyle = '#86e6c4';
-    ctx.fillText(`${t('YOU', 'TY')} ${this.tanks[0].health}`, 8, 8);
-    ctx.fillStyle = '#ff8883';
-    ctx.textAlign = 'right';
-    ctx.fillText(`CPU ${this.tanks[1].health}`, 232, 8);
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#f5e9d2';
-    ctx.fillText(`${t('WIND', 'WIATR')} ${this.wind > 0 ? '>' : this.wind < 0 ? '<' : '-'} ${Math.abs(this.wind)}`, 120, 8);
-    ctx.fillText(`${t('ANGLE', 'KĄT')} ${Math.round(this.angle)}  ${t('POWER', 'SIŁA')} ${Math.round(this.power)}`, 120, 25);
-    ctx.fillText(this.turn === 'player' ? t('YOUR TURN', 'TWÓJ RUCH') : t('CPU TURN', 'RUCH CPU'), 120, 39);
-    ctx.textAlign = 'left';
+    const label = (value: string, x: number, y: number, color: string, align: 'left' | 'center' | 'right') =>
+      ctx.text(value, x, y, { color, font: 'bold 9px monospace', align, baseline: 'top' });
+    label(`${t("YOU")} ${this.tanks[0].health}`, 8, 8, '#86e6c4', 'left');
+    label(`CPU ${this.tanks[1].health}`, 232, 8, '#ff8883', 'right');
+    label(`${t("WIND")} ${this.wind > 0 ? '>' : this.wind < 0 ? '<' : '-'} ${Math.abs(this.wind)}`, 120, 8, '#f5e9d2', 'center');
+    label(`${t("ANGLE")} ${Math.round(this.angle)}  ${t("POWER")} ${Math.round(this.power)}`, 120, 25, '#f5e9d2', 'center');
+    label(this.turn === 'player' ? t("YOUR TURN") : t("CPU TURN"), 120, 39, '#f5e9d2', 'center');
   }
 }
 

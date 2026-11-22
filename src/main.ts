@@ -1,6 +1,7 @@
 import './styles.css';
 import logoUrl from '../assets/logo/pocket-arcade-green.svg';
 import { createGame, type Action, type Game, type GameId, type SnakeSpeed } from './games';
+import { CanvasRenderer } from './games/canvas-renderer';
 import { createAccount, type Theme } from './account';
 import { ArcadeAudio } from './audio';
 import { achievements, achievementIcons } from './achievements';
@@ -45,7 +46,7 @@ expandButton.setAttribute('aria-pressed', 'false');
 document.querySelector('.game-actions')!.append(expandButton);
 function renderExpandButton(): void {
   const expanded = expandButton.getAttribute('aria-pressed') === 'true';
-  expandButton.textContent = expanded ? t('Smaller board', 'Zmniejsz planszę') : t('Expand board', 'Powiększ planszę');
+  expandButton.textContent = expanded ? t("Smaller board") : t("Expand board");
 }
 expandButton.addEventListener('click', () => {
   const expanded = expandButton.getAttribute('aria-pressed') !== 'true';
@@ -54,7 +55,7 @@ expandButton.addEventListener('click', () => {
   renderExpandButton();
 });
 const picker = $<HTMLElement>('#picker'), gameView = $<HTMLElement>('#game-view'), accountView = $<HTMLElement>('.account-section');
-const canvas = $<HTMLCanvasElement>('canvas'), ctx = canvas.getContext('2d')!;
+const canvas = $<HTMLCanvasElement>('canvas'), ctx = new CanvasRenderer(canvas);
 const settings = $<HTMLDialogElement>('#settings'), audio = new ArcadeAudio();
 const music = $<HTMLInputElement>('#music'), effects = $<HTMLInputElement>('#effects'), theme = $<HTMLSelectElement>('#theme');
 const start = $<HTMLButtonElement>('#start'), pauseButton = $<HTMLButtonElement>('#pause');
@@ -67,7 +68,7 @@ flagButton.setAttribute('aria-pressed', 'false');
 document.querySelector('.game-side .dpad')!.before(flagButton);
 let flagMode = false;
 function renderFlagButton(): void {
-  flagButton.textContent = flagMode ? t('Flag mode: on', 'Tryb flag: włączony') : t('Flag mode: off', 'Tryb flag: wyłączony');
+  flagButton.textContent = flagMode ? t("Flag mode: on") : t("Flag mode: off");
   flagButton.setAttribute('aria-pressed', String(flagMode));
 }
 flagButton.addEventListener('click', () => { flagMode = !flagMode; renderFlagButton(); });
@@ -137,7 +138,7 @@ function renderAchievements(): void {
   if (!items?.length || !gameId) return;
   const title = document.createElement('p');
   title.className = 'eyebrow';
-  title.textContent = t('ACHIEVEMENTS', 'OSIĄGNIĘCIA');
+  title.textContent = t("ACHIEVEMENTS");
   achievementPane.append(title);
   achievementPane.append(achievementIcons(items, visibleBests[gameId]));
 }
@@ -148,9 +149,9 @@ const account = createAccount($<HTMLElement>('#account'), state => {
   renderAchievements();
   theme.value = state.theme;
   refreshAccountText = () => {
-    for (const g of games) $<HTMLElement>(`[data-best="${g.id}"]`).textContent = state.bests[g.id] === undefined ? t('Not played', 'Jeszcze nie grano') : String(state.bests[g.id]);
-    $('#storage-note').textContent = state.sessionOnly || !storageAvailable ? t('Device storage unavailable; guest data and preferences last for this session only.', 'Pamięć urządzenia jest niedostępna; dane gościa i ustawienia zostaną zachowane tylko podczas tej sesji.') : '';
-    $<HTMLButtonElement>('#login').textContent = state.signedIn ? t('Account ↗', 'Konto ↗') : t('Account / Log in ↗', 'Konto / Zaloguj się ↗');
+    for (const g of games) $<HTMLElement>(`[data-best="${g.id}"]`).textContent = state.bests[g.id] === undefined ? t("Not played") : String(state.bests[g.id]);
+    $('#storage-note').textContent = state.sessionOnly || !storageAvailable ? t("Device storage unavailable; guest data and preferences last for this session only.") : '';
+    $<HTMLButtonElement>('#login').textContent = state.signedIn ? t("Account ↗") : t("Account / Log in ↗");
   };
   refreshAccountText();
 });
@@ -205,121 +206,110 @@ canvas.addEventListener('pointercancel', () => { boardPress = null; });
 window.addEventListener('blur', () => { pauseGame(); release(); });
 document.addEventListener('visibilitychange', () => { if (document.hidden) { pauseGame(); release(); } });
 const gameCopy: Record<GameId, { name: string; description: string; instructions: string }> = {
-  snake: { name: 'Wąż', description: 'Zbieraj owoce. Rośnij. Zachowaj czujność.', instructions: 'Zbieraj owoce, aby rosnąć. Unikaj ścian i własnego ogona.' },
-  breakout: { name: 'Breakout', description: 'Rozbij mur, cegła po cegle.', instructions: 'Poruszaj paletką, aby odbijać piłkę i rozbić wszystkie cegły.' },
-  'lane-dodger': { name: 'Unikaj pojazdów', description: 'Wybierz pas i omijaj pojazdy.', instructions: 'Zmieniaj pasy, aby unikać pojazdów. Za każdy ominięty samochód zdobywasz punkt.' },
-  labyrinth: { name: 'Labirynt', description: 'Znajdź drogę przez labirynt.', instructions: 'Znajdź złote wyjście. Mniej ruchów oznacza więcej punktów.' },
-  'frog-crossing': { name: 'Przeprawa żaby', description: 'Przejdź przez drogę i przepłyń rzekę na kłodach.', instructions: 'Unikaj pojazdów, wskakuj na kłody i dotrzyj na drugi brzeg.' },
-  tetris: { name: 'Tetris', description: 'Układaj klocki i usuwaj pełne linie.', instructions: 'Przesuwaj klocki w lewo i prawo, obracaj w górę i przyspieszaj w dół. Wypełniaj linie.' },
-  'pac-man': { name: 'Pac-Man', description: 'Zbieraj kropki i unikaj duchów.', instructions: 'Zbierz wszystkie kropki i unikaj duchów. Duże kropki pozwalają je zjadać przez chwilę.' },
-  asteroids: { name: 'Asteroidy', description: 'Pilotuj statek przez pole asteroid.', instructions: 'Skręcaj w lewo i w prawo, przyspieszaj w górę i strzelaj w dół. Niszczenie asteroid daje punkty.' },
-  minesweeper: { name: 'Saper', description: 'Odkryj pole, nie trafiając na minę.', instructions: 'Odkryj wszystkie bezpieczne pola. Liczby wskazują sąsiednie miny.' },
-  'scorched-earth': { name: 'Scorched Earth', description: 'Celuj, strzelaj i pokonaj wrogi czołg.', instructions: 'Walcz z komputerem. Góra i dół zmieniają kąt, lewo i prawo siłę strzału. Traf przeciwnika, uwzględniając wiatr.' },
+  "snake": { name: "Snake", description: "Gather fruit. Grow longer. Stay sharp.", instructions: "Collect fruit to grow. Avoid the walls and your own tail." },
+  "breakout": { name: "Breakout", description: "Clear the wall, one brick at a time.", instructions: "Move the paddle to keep the ball in play and clear every brick." },
+  "lane-dodger": { name: "game-picker\u0004Lane Dodger", description: "Pick a lane and keep the road clear.", instructions: "Change lanes to avoid traffic. Every car you pass earns a point." },
+  "labyrinth": { name: "Labyrinth", description: "Find your way through the maze.", instructions: "Find the gold exit. Fewer moves earn a higher score." },
+  "frog-crossing": { name: "game-picker\u0004Frog Crossing", description: "Cross the road and ride logs to the far bank.", instructions: "Avoid traffic, hop onto logs, and reach the far bank." },
+  "tetris": { name: "Tetris", description: "Stack blocks and clear complete lines.", instructions: "Move blocks left and right, rotate with up, and soft drop with down. Fill lines to clear them." },
+  "pac-man": { name: "Pac-Man", description: "Eat the dots and dodge the ghosts.", instructions: "Collect every dot and avoid ghosts. Power pellets let you eat ghosts briefly." },
+  "asteroids": { name: "Asteroids", description: "Pilot your ship through an asteroid field.", instructions: "Turn left or right, thrust with up, and fire with down. Destroy asteroids to score." },
+  "minesweeper": { name: "Minesweeper", description: "Clear the field without setting off a mine.", instructions: "Reveal every safe square. Numbers count neighboring mines." },
+  "scorched-earth": { name: "game-picker\u0004Scorched Earth", description: "Aim, fire and outlast the enemy tank.", instructions: "Duel the computer. Up and down adjust angle; left and right adjust power. Account for the wind and hit the enemy tank." },
 };
 function gameName(id: GameId): string {
-  return t(games.find(g => g.id === id)!.name, gameCopy[id].name);
+  return t(gameCopy[id].name);
 }
 function renderGameText(): void {
   renderAchievements();
   if (gameId) {
     $('#game-title').textContent = gameName(gameId);
-    const instructions: Record<GameId, string> = {
-      snake: 'Collect fruit to grow. Avoid the walls and your own tail.',
-      breakout: 'Move the paddle to keep the ball in play and clear every brick.',
-      'lane-dodger': 'Change lanes to avoid traffic. Every car you pass earns a point.',
-      labyrinth: 'Find the gold exit. Fewer moves earn a higher score.',
-      'frog-crossing': 'Avoid traffic, hop onto logs, and reach the far bank.',
-      tetris: 'Move blocks left and right, rotate with up, and soft drop with down. Fill lines to clear them.',
-      'pac-man': 'Collect every dot and avoid ghosts. Power pellets let you eat ghosts briefly.',
-      asteroids: 'Turn left or right, thrust with up, and fire with down. Destroy asteroids to score.',
-      minesweeper: 'Reveal every safe square. Numbers count neighboring mines.',
-      'scorched-earth': 'Duel the computer. Up and down adjust angle; left and right adjust power. Account for the wind and hit the enemy tank.',
-    };
-    $('#instructions').textContent = t(instructions[gameId], gameCopy[gameId].instructions);
+    
+    $('#instructions').textContent = t(gameCopy[gameId].instructions);
   flagButton.hidden = gameId !== 'minesweeper';
   $<HTMLElement>('.game-side .hint').innerHTML = gameId === 'minesweeper'
-    ? t('Click or tap to reveal. Right-click or enable flag mode to mark mines.', 'Kliknij lub dotknij, aby odkryć pole. Kliknij prawym przyciskiem lub włącz tryb flag, aby oznaczać miny.')
+    ? t("Click or tap to reveal. Right-click or enable flag mode to mark mines.")
     : gameId === 'scorched-earth'
-      ? t('Use arrow keys or WASD to aim. Press Space or Fire to shoot; touch controls are below.', 'Celuj strzałkami lub klawiszami WASD. Naciśnij spację lub Strzał, aby wystrzelić; sterowanie dotykowe jest poniżej.')
-      : t('Use arrow keys or WASD.<br>On touch, use the buttons below.', 'Użyj strzałek lub klawiszy WASD.<br>Na ekranie dotykowym użyj przycisków poniżej.');
+      ? t("Use arrow keys or WASD to aim. Press Space or Fire to shoot; touch controls are below.")
+      : t("Use arrow keys or WASD.<br>On touch, use the buttons below.");
   }
   const won = game?.status === 'won';
-  $('#message-label').textContent = mode === 'paused' ? t('TAKE A BREATHER', 'CHWILA PRZERWY') : mode === 'ended' ? (won ? t('WELL PLAYED', 'DOBRA GRA') : t('GAME OVER', 'KONIEC GRY')) : t('READY, PLAYER?', 'GOTOWY DO GRY?');
-  $('#message-title').textContent = mode === 'paused' ? t('Paused.', 'Pauza.') : mode === 'ended' ? (won ? t('You won!', 'Wygrana!') : t('Nice run.', 'Dobra gra.')) : t("Let's play.", 'Zagrajmy.');
-  start.firstChild!.textContent = mode === 'paused' ? t('RESUME ', 'WZNÓW ') : mode === 'ended' ? t('PLAY AGAIN ', 'ZAGRAJ PONOWNIE ') : t('START GAME ', 'ROZPOCZNIJ GRĘ ');
-  pauseButton.textContent = mode === 'paused' ? t('Resume', 'Wznów') : t('Pause', 'Pauza');
+  $('#message-label').textContent = mode === 'paused' ? t("TAKE A BREATHER") : mode === 'ended' ? (won ? t("WELL PLAYED") : t("GAME OVER")) : t("READY, PLAYER?");
+  $('#message-title').textContent = mode === 'paused' ? t("Paused.") : mode === 'ended' ? (won ? t("You won!") : t("Nice run.")) : t("Let's play.");
+  start.firstChild!.textContent = mode === 'paused' ? t("RESUME ") : mode === 'ended' ? t("PLAY AGAIN ") : t("START GAME ");
+  pauseButton.textContent = mode === 'paused' ? t("Resume") : t("Pause");
 }
 function renderLanguage(): void {
   languageSelect.value = getLanguage();
-  const text = (selector: string, en: string, pl: string) => { $(selector).textContent = t(en, pl); };
-  const attr = (selector: string, attribute: string, en: string, pl: string) => { $(selector).setAttribute(attribute, t(en, pl)); };
-  attr('.brand', 'aria-label', 'Pocket Arcade home', 'Pocket Arcade — strona główna');
-  document.querySelectorAll('.settings-open').forEach(button => { button.setAttribute('aria-label', t('Open settings', 'Otwórz ustawienia')); button.setAttribute('title', t('Settings', 'Ustawienia')); });
-  $<HTMLElement>('.hero .eyebrow').lastChild!.textContent = t(' YOUR LITTLE CORNER OF PLAY', ' TWÓJ MAŁY ZAKĄTEK GRY');
-  $('.intro').innerHTML = t('A little play goes a long way.<br>Pick a cartridge and beat your best.', 'Odrobina zabawy wiele zmienia.<br>Wybierz grę i pobij swój rekord.');
+  const text = (selector: string, en: string) => { $(selector).textContent = t(en); };
+  const attr = (selector: string, attribute: string, en: string) => { $(selector).setAttribute(attribute, t(en)); };
+  attr('.brand', 'aria-label', "Pocket Arcade home");
+  document.querySelectorAll('.settings-open').forEach(button => { button.setAttribute('aria-label', t("Open settings")); button.setAttribute('title', t("Settings")); });
+  $<HTMLElement>('.hero .eyebrow').lastChild!.textContent = t(" YOUR LITTLE CORNER OF PLAY");
+  $('.intro').innerHTML = t("A little play goes a long way.<br>Pick a cartridge and beat your best.");
   const stamp = document.querySelectorAll('.hero-stamp span');
-  stamp[0].textContent = t('INSERT', 'WRZUĆ'); stamp[1].textContent = t('JUST KIDDING ✳', 'ŻARTUJEMY ✳');
-  text('.hero-stamp strong', 'COIN', 'MONETĘ');
-  $<HTMLElement>('.section-heading .eyebrow').firstChild!.textContent = t('THE COLLECTION ', 'KOLEKCJA ');
-  text('.section-heading .subtle', `/ ${String(games.length).padStart(2, '0')} GAMES`, `/ ${String(games.length).padStart(2, '0')} GIER`);
-  text('.section-heading h2', 'Choose your game', 'Wybierz grę');
-  text('.section-note', 'GOOD GAMES, NO QUARTERS.', 'DOBRE GRY, BEZ MONET.');
+  stamp[0].textContent = t("INSERT"); stamp[1].textContent = t("JUST KIDDING ✳");
+  text('.hero-stamp strong', "COIN");
+  $<HTMLElement>('.section-heading .eyebrow').firstChild!.textContent = t("THE COLLECTION ");
+  $('.section-heading .subtle').textContent = t("/ {arg0} GAMES", { arg0: String(games.length).padStart(2, '0') });
+  text('.section-heading h2', "Choose your game");
+  text('.section-note', "GOOD GAMES, NO QUARTERS.");
   document.querySelectorAll<HTMLElement>('.card').forEach((card, index) => {
     const g = games[index], name = gameName(g.id);
     card.querySelector('h3')!.textContent = name;
-    card.querySelector('.card-body > p')!.textContent = t(g.description, gameCopy[g.id].description);
-    card.querySelector('.micro')!.textContent = t('PERSONAL BEST', 'REKORD OSOBISTY');
-    card.closest('a')!.setAttribute('aria-label', t(`Play ${name}`, `Zagraj: ${name}`));
+    card.querySelector('.card-body > p')!.textContent = t(gameCopy[g.id].description);
+    card.querySelector('.micro')!.textContent = t("PERSONAL BEST");
+    card.closest('a')!.setAttribute('aria-label', t("Play {arg0}", { arg0: name }));
   });
   const bottom = document.querySelectorAll('.bottom-line span');
-  bottom[0].textContent = t('MADE FOR A LITTLE BREAK.', 'STWORZONE NA MAŁĄ PRZERWĘ.');
-  bottom[1].textContent = t('★  PLAY AT YOUR OWN PACE', '★  GRAJ WE WŁASNYM TEMPIE');
-  text('.back', '←   BACK TO ARCADE', '←   WRÓĆ DO ARCADE');
-  $<HTMLElement>('.game-title-row .eyebrow').firstChild!.textContent = t('NOW PLAYING ', 'TERAZ GRASZ ');
-  text('.score-box .micro', 'SCORE', 'WYNIK');
-  attr('canvas', 'aria-label', 'Game board', 'Plansza gry');
-  text('#replay', 'New game', 'Nowa gra');
+  bottom[0].textContent = t("MADE FOR A LITTLE BREAK.");
+  bottom[1].textContent = t("★  PLAY AT YOUR OWN PACE");
+  text('.back', "←   BACK TO ARCADE");
+  $<HTMLElement>('.game-title-row .eyebrow').firstChild!.textContent = t("NOW PLAYING ");
+  text('.score-box .micro', "SCORE");
+  attr('canvas', 'aria-label', "Game board");
+  text('#replay', "New game");
   renderFlagButton();
-  fireButton.textContent = t('Fire', 'Strzał');
+  fireButton.textContent = t("Fire");
   renderExpandButton();
-  text('.game-side > .eyebrow', 'HOW TO PLAY', 'JAK GRAĆ');
-  $('.game-side .hint').innerHTML = t('Use arrow keys or WASD.<br>On touch, use the buttons below.', 'Użyj strzałek lub klawiszy WASD.<br>Na ekranie dotykowym użyj przycisków poniżej.');
-  attr('.dpad', 'aria-label', 'Directional controls', 'Sterowanie kierunkowe');
-  for (const [action, en, pl] of [['up', 'Up', 'Góra'], ['down', 'Down', 'Dół'], ['left', 'Left', 'Lewo'], ['right', 'Right', 'Prawo']]) attr(`[data-action="${action}"]`, 'aria-label', en, pl);
-  $('.side-foot').innerHTML = t('TAKE YOUR TIME.<br>THE HIGH SCORE CAN WAIT.', 'GRAJ BEZ POŚPIECHU.<br>REKORD MOŻE POCZEKAĆ.');
-  attr('.account-section', 'aria-label', 'Player account', 'Konto gracza');
-  text('footer > span:nth-child(2)', 'SMALL GAMES. BIG JOY.', 'MAŁE GRY. WIELKA RADOŚĆ.');
-  text('.dialog-head .eyebrow', 'MAKE IT YOURS', 'DOPASUJ DO SIEBIE');
-  text('.dialog-head h2', 'Settings', 'Ustawienia');
-  attr('.dialog-head button', 'aria-label', 'Close settings', 'Zamknij ustawienia');
-  const setting = (label: Element, title: [string, string], detail: [string, string]) => {
-    label.querySelector('strong')!.textContent = t(...title);
-    label.querySelector('small')!.textContent = t(...detail);
+  text('.game-side > .eyebrow', "HOW TO PLAY");
+  $('.game-side .hint').innerHTML = t("Use arrow keys or WASD.<br>On touch, use the buttons below.");
+  attr('.dpad', 'aria-label', "Directional controls");
+  for (const [action, en] of [['up', "Up"], ['down', "Down"], ['left', "Left"], ['right', "Right"]]) attr(`[data-action="${action}"]`, 'aria-label', en);
+  $('.side-foot').innerHTML = t("TAKE YOUR TIME.<br>THE HIGH SCORE CAN WAIT.");
+  attr('.account-section', 'aria-label', "Player account");
+  text('footer > span:nth-child(2)', "SMALL GAMES. BIG JOY.");
+  text('.dialog-head .eyebrow', "MAKE IT YOURS");
+  text('.dialog-head h2', "Settings");
+  attr('.dialog-head button', 'aria-label', "Close settings");
+  const setting = (label: Element, title: string, detail: string) => {
+    label.querySelector('strong')!.textContent = t(title);
+    label.querySelector('small')!.textContent = t(detail);
   };
-  setting(music.closest('label')!, ['Music', 'Muzyka'], ['A little soundtrack for your game', 'Muzyka towarzysząca grze']);
-  setting(effects.closest('label')!, ['Sound effects', 'Efekty dźwiękowe'], ['Sounds for points and game over', 'Dźwięki punktów i końca gry']);
-  setting(theme.closest('label')!, ['Theme', 'Motyw'], ['Pick your cabinet colors', 'Wybierz kolory automatu']);
-  for (const [value, en, pl] of [['midnight', 'Midnight', 'Północ'], ['amber', 'Amber', 'Bursztyn'], ['mint', 'Mint', 'Mięta']]) theme.querySelector(`option[value="${value}"]`)!.textContent = t(en, pl);
-  setting(languageLabel, ['Language', 'Język'], ['Choose your language', 'Wybierz język']);
-  languageSelect.setAttribute('aria-label', t('Language', 'Język'));
-  setting(speedLabel, ['Game speed', 'Prędkość gry'], ['Applies to the next run', 'Dotyczy następnej rozgrywki']);
-  speedSelect.setAttribute('aria-label', t('Game speed', 'Prędkość gry'));
-  for (const [value, en, pl] of [['slow', 'Slow', 'Wolno'], ['medium', 'Medium', 'Średnio'], ['fast', 'Fast', 'Szybko']]) speedSelect.querySelector(`option[value="${value}"]`)!.textContent = t(en, pl);
-  setting(difficultyLabel, ['Difficulty', 'Poziom trudności'], ['Applies to the next run', 'Dotyczy następnej rozgrywki']);
-  difficultySelect.setAttribute('aria-label', t('Difficulty', 'Poziom trudności'));
-  for (const [value, en, pl] of [['easy', 'Easy', 'Łatwy'], ['medium', 'Medium', 'Średni'], ['hard', 'Hard', 'Trudny']]) difficultySelect.querySelector(`option[value="${value}"]`)!.textContent = t(en, pl);
-  setting(mazeLabel, ['Maze size', 'Rozmiar labiryntu'], ['Applies to the next run', 'Dotyczy następnej rozgrywki']);
-  mazeSelect.setAttribute('aria-label', t('Maze size', 'Rozmiar labiryntu'));
-  mazeSelect.querySelector('option[value="custom"]')!.textContent = t('Custom', 'Własny');
-  setting(customLabel, ['Custom size', 'Własny rozmiar'], ['Square maze, 5–50 cells per side', 'Kwadratowy labirynt, 5–50 pól na bok']);
-  customSize.setAttribute('aria-label', t('Custom maze size', 'Własny rozmiar labiryntu'));
-  setting(lanesLabel, ['Road lanes', 'Pasy ruchu'], ['Applies to the next run', 'Dotyczy następnej rozgrywki']);
-  lanesSelect.setAttribute('aria-label', t('Road lanes', 'Pasy ruchu'));
-  for (const value of ['3', '5', '7', '10']) lanesSelect.querySelector(`option[value="${value}"]`)!.textContent = t(`${value} lanes`, `${value} ${value === '5' || value === '7' || value === '10' ? 'pasów' : 'pasy'}`);
-  lanesSelect.querySelector('option[value="custom"]')!.textContent = t('Custom', 'Własna liczba');
-  setting(lanesCustomLabel, ['Custom lanes', 'Własna liczba pasów'], ['1–15 road lanes', '1–15 pasów ruchu']);
-  lanesCustom.setAttribute('aria-label', t('Custom road lanes', 'Własna liczba pasów ruchu'));
-  $<HTMLElement>('.dialog-close').firstChild!.textContent = t('DONE ', 'GOTOWE ');
+  setting(music.closest('label')!, "Music", "A little soundtrack for your game");
+  setting(effects.closest('label')!, "Sound effects", "Sounds for points and game over");
+  setting(theme.closest('label')!, "Theme", "Pick your cabinet colors");
+  for (const [value, en] of [['midnight', "Midnight"], ['amber', "Amber"], ['mint', "Mint"]]) theme.querySelector(`option[value="${value}"]`)!.textContent = t(en);
+  setting(languageLabel, "Language", "Choose your language");
+  languageSelect.setAttribute('aria-label', t("Language"));
+  setting(speedLabel, "Game speed", "Applies to the next run");
+  speedSelect.setAttribute('aria-label', t("Game speed"));
+  for (const [value, en] of [['slow', "Slow"], ['medium', "Medium"], ['fast', "Fast"]]) speedSelect.querySelector(`option[value="${value}"]`)!.textContent = t(en);
+  setting(difficultyLabel, "Difficulty", "Applies to the next run");
+  difficultySelect.setAttribute('aria-label', t("Difficulty"));
+  for (const [value, en] of [['easy', "Easy"], ['medium', "difficulty\u0004Medium"], ['hard', "Hard"]]) difficultySelect.querySelector(`option[value="${value}"]`)!.textContent = t(en);
+  setting(mazeLabel, "Maze size", "Applies to the next run");
+  mazeSelect.setAttribute('aria-label', t("Maze size"));
+  mazeSelect.querySelector('option[value="custom"]')!.textContent = t("Custom");
+  setting(customLabel, "Custom size", "Square maze, 5–50 cells per side");
+  customSize.setAttribute('aria-label', t("Custom maze size"));
+  setting(lanesLabel, "Road lanes", "Applies to the next run");
+  lanesSelect.setAttribute('aria-label', t("Road lanes"));
+  for (const value of ['3', '5', '7', '10']) lanesSelect.querySelector(`option[value="${value}"]`)!.textContent = t(value === '3' ? "{value} lanes" : "road-lanes-plural\u0004{value} lanes", { value });
+  lanesSelect.querySelector('option[value="custom"]')!.textContent = t("road-lanes\u0004Custom");
+  setting(lanesCustomLabel, "Custom lanes", "1–15 road lanes");
+  lanesCustom.setAttribute('aria-label', t("Custom road lanes"));
+  $<HTMLElement>('.dialog-close').firstChild!.textContent = t("DONE ");
   refreshAccountText();
   renderGameText();
 }
