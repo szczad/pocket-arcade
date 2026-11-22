@@ -17,3 +17,4 @@ canvas.mine-board{touch-action:none;cursor:crosshair}
 .game-side button[aria-pressed=true]{border-color:var(--accent);color:var(--accent)}
 .artillery-fire{margin-top:14px;min-width:120px;justify-content:center}
 .game-layout.expanded .artillery-fire{grid-column:2;justify-self:stretch}
+.game-layout.expanded{align-items:center}
