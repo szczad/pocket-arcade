@@ -1,5 +1,6 @@
 export type GameId = 'snake' | 'breakout' | 'lane-dodger';
 export type Action = 'up' | 'down' | 'left' | 'right';
+export type SnakeSpeed = 'slow' | 'medium' | 'fast';
 export interface Game {
   input(action: Action, pressed: boolean): void;
   step(): void;
@@ -23,6 +24,8 @@ class Snake implements Game {
   private fruit: Point = this.spawnFruit()!;
   private ticks = 0;
 
+  constructor(private readonly moveInterval: number) {}
+
   private spawnFruit(): Point | null {
     const free: Point[] = [];
     for (let y = 0; y < 20; y++) for (let x = 0; x < 20; x++) {
@@ -41,7 +44,7 @@ class Snake implements Game {
   }
 
   step(): void {
-    if (this.status !== 'playing' || ++this.ticks < 8) return;
+    if (this.status !== 'playing' || ++this.ticks < this.moveInterval) return;
     this.ticks = 0;
     if (this.next) this.direction = this.next;
     this.next = null;
@@ -221,9 +224,9 @@ class LaneDodger implements Game {
   }
 }
 
-export function createGame(id: GameId): Game {
+export function createGame(id: GameId, snakeSpeed: SnakeSpeed = 'medium'): Game {
   switch (id) {
-    case 'snake': return new Snake();
+    case 'snake': return new Snake({ slow: 12, medium: 8, fast: 4 }[snakeSpeed]);
     case 'breakout': return new Breakout();
     case 'lane-dodger': return new LaneDodger();
   }

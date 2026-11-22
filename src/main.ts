@@ -1,5 +1,5 @@
 import './styles.css';
-import { createGame, type Action, type Game, type GameId } from './games';
+import { createGame, type Action, type Game, type GameId, type SnakeSpeed } from './games';
 import { createAccount, type Theme } from './account';
 import { ArcadeAudio } from './audio';
 
@@ -17,6 +17,12 @@ const settings = $<HTMLDialogElement>('#settings'), audio = new ArcadeAudio();
 const music = $<HTMLInputElement>('#music'), effects = $<HTMLInputElement>('#effects'), theme = $<HTMLSelectElement>('#theme');
 const start = $<HTMLButtonElement>('#start'), pauseButton = $<HTMLButtonElement>('#pause');
 const boardMessage = $<HTMLElement>('#board-message');
+const speedLabel = document.createElement('label');
+speedLabel.className = 'snake-speed';
+speedLabel.innerHTML = 'SNAKE SPEED <span>(NEXT RUN)</span><select aria-label="Snake speed"><option value="slow">Slow</option><option value="medium" selected>Medium</option><option value="fast">Fast</option></select>';
+$<HTMLElement>('.game-side').insertBefore(speedLabel, $('#instructions'));
+const speedSelect = speedLabel.querySelector<HTMLSelectElement>('select')!;
+speedSelect.addEventListener('change', () => { if (gameId === 'snake' && mode === 'ready') resetGame(); });
 let storageAvailable = true;
 try { const value = localStorage.getItem('pocket-arcade:audio'); if (value) { const saved = JSON.parse(value); music.checked = saved.music !== false; effects.checked = saved.effects !== false; } } catch { storageAvailable = false; }
 audio.music = music.checked; audio.effects = effects.checked;
@@ -42,7 +48,7 @@ const held = new Set<Action>();
 function release(): void { for (const action of held) game?.input(action, false); held.clear(); document.querySelectorAll('.dpad button').forEach(b => b.classList.remove('pressed')); }
 function pauseGame(): void { if (mode !== 'playing') return; mode = 'paused'; cancelAnimationFrame(frame); audio.stop(); release(); boardMessage.hidden = false; $('#message-label').textContent = 'TAKE A BREATHER'; $('#message-title').textContent = 'Paused.'; start.innerHTML = 'RESUME <span>→</span>'; pauseButton.textContent = 'Resume'; }
 function begin(): void { if (!game || mode === 'playing') return; if (mode === 'ended') resetGame(); mode = 'playing'; boardMessage.hidden = true; pauseButton.disabled = false; pauseButton.textContent = 'Pause'; last = 0; accumulator = 0; void audio.start(); frame = requestAnimationFrame(tick); }
-function resetGame(): void { if (!gameId) return; cancelAnimationFrame(frame); audio.stop(); release(); game = createGame(gameId); previousScore = 0; mode = 'ready'; $('#score').textContent = '0'; $('#message-label').textContent = 'READY, PLAYER?'; $('#message-title').textContent = "Let's play."; start.innerHTML = 'START GAME <span>→</span>'; boardMessage.hidden = false; pauseButton.disabled = true; pauseButton.textContent = 'Pause'; game.draw(ctx); }
+function resetGame(): void { if (!gameId) return; cancelAnimationFrame(frame); audio.stop(); release(); speedLabel.hidden = gameId !== 'snake'; game = createGame(gameId, speedSelect.value as SnakeSpeed); previousScore = 0; mode = 'ready'; $('#score').textContent = '0'; $('#message-label').textContent = 'READY, PLAYER?'; $('#message-title').textContent = "Let's play."; start.innerHTML = 'START GAME <span>→</span>'; boardMessage.hidden = false; pauseButton.disabled = true; pauseButton.textContent = 'Pause'; game.draw(ctx); }
 function tick(now: number): void { if (mode !== 'playing' || !game) return; if (!last) last = now; accumulator += Math.min(now - last, 250); last = now; while (accumulator >= 1000 / 60 && game.status === 'playing') { game.step(); accumulator -= 1000 / 60; } if (game.score !== previousScore) { previousScore = game.score; $('#score').textContent = String(game.score); audio.cue(); } game.draw(ctx); if (game.status !== 'playing') { mode = 'ended'; release(); audio.stop(); audio.cue(true); pauseButton.disabled = true; $('#message-label').textContent = game.status === 'won' ? 'WELL PLAYED' : 'GAME OVER'; $('#message-title').textContent = game.status === 'won' ? 'You won!' : 'Nice run.'; start.innerHTML = 'PLAY AGAIN <span>→</span>'; boardMessage.hidden = false; if (gameId) account.record(gameId, game.score); return; } frame = requestAnimationFrame(tick); }
 start.onclick = begin;
 pauseButton.onclick = () => mode === 'playing' ? pauseGame() : begin();
