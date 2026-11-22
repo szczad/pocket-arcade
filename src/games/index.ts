@@ -111,9 +111,9 @@ class Breakout implements Game {
     }
     this.ballX += this.vx;
     this.ballY += this.vy;
-    if (this.ballX < 4) { this.ballX = 4; this.vx = Math.abs(this.vx); }
-    if (this.ballX > 236) { this.ballX = 236; this.vx = -Math.abs(this.vx); }
-    if (this.ballY < 4) { this.ballY = 4; this.vy = Math.abs(this.vy); }
+    if (this.ballX < 8) { this.ballX = 8; this.vx = Math.abs(this.vx); }
+    if (this.ballX > 232) { this.ballX = 232; this.vx = -Math.abs(this.vx); }
+    if (this.ballY < 9) { this.ballY = 9; this.vy = Math.abs(this.vy); }
     if (this.vy > 0 && this.ballY + 4 >= 214 && this.ballY - this.vy + 4 <= 214 && this.ballX + 4 >= this.paddle && this.ballX - 4 <= this.paddle + 40) {
       const offset = Math.max(-1, Math.min(1, (this.ballX - (this.paddle + 20)) / 20));
       this.ballY = 210;
