@@ -12,7 +12,7 @@ npm run dev
 ```
 
 Open the URL printed by Vite. Accounts are optional: without Supabase configuration, guest play remains available. Guest records and settings are stored on the device when browser storage is available; otherwise they last only for the current session. Account records are separate, and importing guest records requires explicit approval.
-Snake offers Slow, Medium, and Fast speeds; changes made during a run apply to the next run. Medium is the default. Personal bests are shared across speeds.
+Every game offers Slow, Medium, and Fast speeds; changes made during a run apply to the next run. Medium is the default. Personal bests are shared across speeds.
 
 To run the local account backend, install a Docker-compatible runtime and start the Supabase stack:
 

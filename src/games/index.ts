@@ -226,7 +226,7 @@ class LaneDodger implements Game {
 
 export function createGame(id: GameId, snakeSpeed: SnakeSpeed = 'medium'): Game {
   switch (id) {
-    case 'snake': return new Snake({ slow: 12, medium: 8, fast: 4 }[snakeSpeed]);
+    case 'snake': return new Snake({ slow: 16, medium: 8, fast: 4 }[snakeSpeed]);
     case 'breakout': return new Breakout();
     case 'lane-dodger': return new LaneDodger();
   }
