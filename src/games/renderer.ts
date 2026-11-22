@@ -12,3 +12,7 @@ export interface GameRenderer {
   text(value: string, x: number, y: number, style: TextStyle): void;
   transformed(x: number, y: number, angle: number, draw: () => void): void;
 }
+
+export function rect(renderer: GameRenderer, color: string, x: number, y: number, width: number, height: number): void {
+  renderer.rectangle(color, Math.round(x), Math.round(y), width, height);
+}

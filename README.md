@@ -48,6 +48,10 @@ English source messages and Polish translations are catalogued in `localization/
 
 The engine owns the configurable logical resolution, which defaults to 320×200. Games draw through the `GameRenderer` interface in `src/games/renderer.ts`; `src/games/canvas-renderer.ts` is the Canvas 2D backend, and game implementations use renderer primitives rather than browser canvas APIs. Playfields are adapted to the widescreen board, with square grid cells where possible: Snake and Minesweeper use wider grids, Pac-Man has a connected widescreen maze, and Tetris keeps its standard well alongside a side panel.
 
+Each cartridge lives in `src/games/<slug>/`. Its `index.ts` exports the game definition: a run factory, translation message IDs, options, achievements, and the cover pattern from `cover.ts`. Register the definition in `src/games/index.ts`; the picker and account page use that same catalog. The shared cover renderer turns patterns into SVG tiles independently of gameplay rendering.
+
+`src/main.ts` mounts the arcade renderer. Hash navigation pushes an account screen or a fresh game run above the picker; leaving a game discards the run and releases its input.
+
 ## Hosted Supabase and Vercel
 
 Provision or select an authorized Supabase project and Vercel project before deploying. The repository does not include credentials or a deployed URL.

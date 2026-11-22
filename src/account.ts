@@ -1,8 +1,8 @@
 import { createClient, type Session, type SupabaseClient } from '@supabase/supabase-js';
 
-import { achievements, achievementIcons } from './achievements';
+import { achievementIcons } from './achievements';
 import { onLanguageChange, t } from './i18n';
-import type { GameId } from './games';
+import { games, type GameId } from './games';
 export type Theme = 'midnight' | 'amber' | 'mint';
 export type Bests = Partial<Record<GameId, number>>;
 export interface AccountSnapshot {
@@ -12,18 +12,6 @@ export interface AccountSnapshot {
   signedIn: boolean;
 }
 
-const games: { id: GameId; name: () => string }[] = [
-  { id: 'snake', name: () => t('Snake') },
-  { id: 'breakout', name: () => t('Breakout') },
-  { id: 'lane-dodger', name: () => t('Lane Dodger') },
-  { id: 'labyrinth', name: () => t('Labyrinth') },
-  { id: 'frog-crossing', name: () => t('Frog Crossing') },
-  { id: 'tetris', name: () => t('Tetris') },
-  { id: 'pac-man', name: () => t('Pac-Man') },
-  { id: 'asteroids', name: () => t('Asteroids') },
-  { id: 'minesweeper', name: () => t('Minesweeper') },
-  { id: 'scorched-earth', name: () => t('Scorched Earth') },
-];
 const storageKey = 'pocket-arcade.guest.v1';
 const isTheme = (value: unknown): value is Theme => value === 'midnight' || value === 'amber' || value === 'mint';
 const isScore = (value: unknown): value is number => typeof value === 'number' && Number.isSafeInteger(value) && value >= 0;
@@ -139,8 +127,8 @@ export function createAccount(container: HTMLElement, onChange: (snapshot: Accou
       const result = score === undefined ? t('Not played') : score;
       const row = element('section');
       row.className = 'account-game';
-      row.append(element('h3', game.name()), element('p', `${t('Personal best')}: ${result}${pending}`));
-      const items = achievements[game.id];
+      row.append(element('h3', t(game.accountName ?? game.name)), element('p', `${t('Personal best')}: ${result}${pending}`));
+      const items = game.achievements;
       if (items?.length) row.append(achievementIcons(items, score));
       stats.append(row);
     }
@@ -163,7 +151,7 @@ export function createAccount(container: HTMLElement, onChange: (snapshot: Accou
           const score = importOffer[game.id];
           if (score !== undefined) {
             const accountScore = loading || loadFailed ? t('Unavailable') : bests[game.id] ?? t('Not played');
-            choices.append(element('li', t('{game}: device {score}, account {accountScore}', { game: game.name(), score, accountScore })));
+            choices.append(element('li', t('{game}: device {score}, account {accountScore}', { game: t(game.accountName ?? game.name), score, accountScore })));
           }
         }
         section.append(choices, button(importBusy ? t('Merging…') : t('Merge records'), () => { void mergeRecords(); }, busy || importBusy || loading || loadFailed),
