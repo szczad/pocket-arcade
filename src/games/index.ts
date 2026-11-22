@@ -1056,7 +1056,7 @@ class ScorchedEarth implements Game {
   private delay = 0;
   private blast: { x: number; y: number; ticks: number } | null = null;
 
-  constructor() {
+  constructor(private readonly difficulty: 'easy' | 'medium' | 'hard') {
     const phase = Math.random() * Math.PI * 2;
     for (let x = 0; x < 240; x++) {
       this.terrain[x] = Math.round(181 + 12 * Math.sin(x / 34 + phase) + 5 * Math.sin(x / 13 + phase));
@@ -1114,7 +1114,7 @@ class ScorchedEarth implements Game {
 
   private cpuFire(): void {
     // Search the same ballistic model used by live shells, including terrain and wind.
-    const target = this.tanks[0].x + (Math.random() * 10 - 5);
+    const target = this.tanks[0].x;
     let best = Infinity;
     let bestAngle = 45;
     let bestPower = 65;
@@ -1130,7 +1130,9 @@ class ScorchedEarth implements Game {
         }
       }
     }
-    this.launch(1, bestAngle, bestPower);
+    const error = { easy: 16, medium: 9, hard: 4 }[this.difficulty];
+    this.launch(1, Math.max(10, Math.min(85, bestAngle + (Math.random() * 2 - 1) * error)),
+      Math.max(25, Math.min(100, bestPower + (Math.random() * 2 - 1) * error)));
   }
 
   private explode(x: number, y: number): void {
@@ -1235,7 +1237,7 @@ class ScorchedEarth implements Game {
   }
 }
 
-export function createGame(id: GameId, snakeSpeed: SnakeSpeed = 'medium', mazeSize = 10, frogLanes = 5): Game {
+export function createGame(id: GameId, snakeSpeed: SnakeSpeed = 'medium', mazeSize = 10, frogLanes = 5, artilleryDifficulty: 'easy' | 'medium' | 'hard' = 'medium'): Game {
   switch (id) {
     case 'snake': return new Snake({ slow: 16, medium: 8, fast: 4 }[snakeSpeed]);
     case 'breakout': return new Breakout();
@@ -1246,6 +1248,6 @@ export function createGame(id: GameId, snakeSpeed: SnakeSpeed = 'medium', mazeSi
     case 'pac-man': return new PacMan();
     case 'asteroids': return new Asteroids();
     case 'minesweeper': return new Minesweeper();
-    case 'scorched-earth': return new ScorchedEarth();
+    case 'scorched-earth': return new ScorchedEarth(artilleryDifficulty);
   }
 }

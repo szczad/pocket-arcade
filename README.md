@@ -24,7 +24,7 @@ Open Account for records and the same achievement badges shown in each game. Res
 In Pac-Man, use the arrow keys or touch controls to navigate the maze, collect pellets and avoid ghosts. Power pellets let you eat ghosts temporarily. Collect every pellet to win; a score of 100 earns the Maze Muncher achievement.
 In Asteroids, use Left and Right to rotate, Up to thrust, and hold Down to fire repeatedly; touch controls are also available. A score of 100 earns the Asteroid Breaker achievement.
 In Minesweeper, reveal all 85 safe squares on a 10×10 board with 15 mines; the first reveal is safe. Numbers count adjacent mines, and each revealed square scores one point. Click or tap to reveal; right-click or enable Flag mode to mark suspected mines. Flag mode supports touch screens.
-In Scorched Earth, duel a computer-controlled tank on destructible terrain. Use Up/Down to adjust your angle, Left/Right to change power, and Space or Fire to shoot. The directional and Fire buttons also support touch. Account for the wind and protect your tank while damaging the opponent.
+In Scorched Earth, duel a computer-controlled tank on destructible terrain. Use Up/Down to adjust your angle, Left/Right to change power, and Space or Fire to shoot. The directional and Fire buttons also support touch. Account for the wind and protect your tank while damaging the opponent. Choose Easy, Medium or Hard in the game options to adjust the computer's aiming accuracy for the next run.
 
 To run the local account backend, install a Docker-compatible runtime and start the Supabase stack:
 

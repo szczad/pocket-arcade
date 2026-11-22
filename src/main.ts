@@ -107,6 +107,12 @@ const lanesCustom = lanesCustomLabel.querySelector<HTMLInputElement>('input')!;
 const updateLanes = () => { lanesCustomLabel.hidden = gameId !== 'frog-crossing' || lanesSelect.value !== 'custom'; if (gameId === 'frog-crossing' && mode === 'ready') resetGame(); };
 lanesSelect.addEventListener('change', updateLanes);
 lanesCustom.addEventListener('change', () => { lanesCustom.value = String(Math.max(1, Math.min(15, Math.round(Number(lanesCustom.value) || 1)))); updateLanes(); });
+const difficultyLabel = document.createElement('label');
+difficultyLabel.className = 'setting-row';
+difficultyLabel.innerHTML = '<span><strong>Difficulty</strong><small>Applies to the next run</small></span><select aria-label="Difficulty"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select>';
+speedLabel.before(difficultyLabel);
+const difficultySelect = difficultyLabel.querySelector<HTMLSelectElement>('select')!;
+difficultySelect.addEventListener('change', () => { if (gameId === 'scorched-earth' && mode === 'ready') resetGame(); });
 const speedSelect = speedLabel.querySelector<HTMLSelectElement>('select')!;
 const languageLabel = document.createElement('label');
 languageLabel.className = 'setting-row';
@@ -153,7 +159,7 @@ music.onchange = () => { audio.music = music.checked; if (!music.checked) audio.
 effects.onchange = () => { audio.effects = effects.checked; if (!effects.checked) audio.stopEffects(); saveAudio(); };
 theme.onchange = () => account.setTheme(theme.value as Theme);
 let returnFocus: HTMLElement | null = null;
-document.querySelectorAll<HTMLButtonElement>('.settings-open').forEach(button => button.onclick = () => { returnFocus = button; pauseGame(); speedLabel.hidden = !gameId || gameId === 'minesweeper'; mazeLabel.hidden = gameId !== 'labyrinth'; customLabel.hidden = gameId !== 'labyrinth' || mazeSelect.value !== 'custom'; lanesLabel.hidden = gameId !== 'frog-crossing'; lanesCustomLabel.hidden = gameId !== 'frog-crossing' || lanesSelect.value !== 'custom'; settings.showModal(); });
+document.querySelectorAll<HTMLButtonElement>('.settings-open').forEach(button => button.onclick = () => { returnFocus = button; pauseGame(); speedLabel.hidden = !gameId || gameId === 'minesweeper'; mazeLabel.hidden = gameId !== 'labyrinth'; customLabel.hidden = gameId !== 'labyrinth' || mazeSelect.value !== 'custom'; lanesLabel.hidden = gameId !== 'frog-crossing'; lanesCustomLabel.hidden = gameId !== 'frog-crossing' || lanesSelect.value !== 'custom'; difficultyLabel.hidden = gameId !== 'scorched-earth'; settings.showModal(); });
 settings.addEventListener('close', () => returnFocus?.focus());
 let game: Game | null = null, gameId: GameId | null = null;
 let mode: 'ready' | 'playing' | 'paused' | 'ended' = 'ready';
@@ -163,7 +169,7 @@ const held = new Set<Action>();
 function release(): void { for (const action of held) game?.input(action, false); held.clear(); document.querySelectorAll('.dpad button').forEach(b => b.classList.remove('pressed')); }
 function pauseGame(): void { if (mode !== 'playing') return; mode = 'paused'; cancelAnimationFrame(frame); audio.stop(); release(); boardMessage.hidden = false; renderGameText(); }
 function begin(): void { if (!game || mode === 'playing') return; if (mode === 'ended') resetGame(); mode = 'playing'; boardMessage.hidden = true; pauseButton.disabled = false; renderGameText(); last = 0; accumulator = 0; void audio.start(); frame = requestAnimationFrame(tick); }
-function resetGame(): void { if (!gameId) return; cancelAnimationFrame(frame); audio.stop(); release(); const speed = speedSelect.value as SnakeSpeed; const mazeSize = mazeSelect.value === 'custom' ? Math.max(5, Math.min(50, Math.round(Number(customSize.value) || 5))) : Number(mazeSelect.value); const lanes = lanesSelect.value === 'custom' ? Math.max(1, Math.min(15, Math.round(Number(lanesCustom.value) || 1))) : Number(lanesSelect.value); game = createGame(gameId, speed, mazeSize, lanes); simulationScale = gameId === 'snake' ? 1 : { slow: 2 / 3, medium: 1, fast: 2 }[speed]; previousScore = 0; mode = 'ready'; $('#score').textContent = '0'; boardMessage.hidden = false; pauseButton.disabled = true; renderGameText(); game.draw(ctx); }
+function resetGame(): void { if (!gameId) return; cancelAnimationFrame(frame); audio.stop(); release(); const speed = speedSelect.value as SnakeSpeed; const mazeSize = mazeSelect.value === 'custom' ? Math.max(5, Math.min(50, Math.round(Number(customSize.value) || 5))) : Number(mazeSelect.value); const lanes = lanesSelect.value === 'custom' ? Math.max(1, Math.min(15, Math.round(Number(lanesCustom.value) || 1))) : Number(lanesSelect.value); game = createGame(gameId, speed, mazeSize, lanes, difficultySelect.value as 'easy' | 'medium' | 'hard'); simulationScale = gameId === 'snake' ? 1 : { slow: 2 / 3, medium: 1, fast: 2 }[speed]; previousScore = 0; mode = 'ready'; $('#score').textContent = '0'; boardMessage.hidden = false; pauseButton.disabled = true; renderGameText(); game.draw(ctx); }
 function tick(now: number): void { if (mode !== 'playing' || !game) return; if (!last) last = now; accumulator += Math.min(now - last, 250) * simulationScale; last = now; while (accumulator >= 1000 / 60 && game.status === 'playing') { game.step(); accumulator -= 1000 / 60; } if (game.score !== previousScore) { previousScore = game.score; $('#score').textContent = String(game.score); audio.cue(); } game.draw(ctx); if (game.status !== 'playing') { mode = 'ended'; release(); audio.stop(); audio.cue(true); pauseButton.disabled = true; boardMessage.hidden = false; renderGameText(); if (gameId) account.record(gameId, game.score); return; } frame = requestAnimationFrame(tick); }
 start.onclick = begin;
 pauseButton.onclick = () => mode === 'playing' ? pauseGame() : begin();
@@ -299,6 +305,9 @@ function renderLanguage(): void {
   setting(speedLabel, ['Game speed', 'Prędkość gry'], ['Applies to the next run', 'Dotyczy następnej rozgrywki']);
   speedSelect.setAttribute('aria-label', t('Game speed', 'Prędkość gry'));
   for (const [value, en, pl] of [['slow', 'Slow', 'Wolno'], ['medium', 'Medium', 'Średnio'], ['fast', 'Fast', 'Szybko']]) speedSelect.querySelector(`option[value="${value}"]`)!.textContent = t(en, pl);
+  setting(difficultyLabel, ['Difficulty', 'Poziom trudności'], ['Applies to the next run', 'Dotyczy następnej rozgrywki']);
+  difficultySelect.setAttribute('aria-label', t('Difficulty', 'Poziom trudności'));
+  for (const [value, en, pl] of [['easy', 'Easy', 'Łatwy'], ['medium', 'Medium', 'Średni'], ['hard', 'Hard', 'Trudny']]) difficultySelect.querySelector(`option[value="${value}"]`)!.textContent = t(en, pl);
   setting(mazeLabel, ['Maze size', 'Rozmiar labiryntu'], ['Applies to the next run', 'Dotyczy następnej rozgrywki']);
   mazeSelect.setAttribute('aria-label', t('Maze size', 'Rozmiar labiryntu'));
   mazeSelect.querySelector('option[value="custom"]')!.textContent = t('Custom', 'Własny');
