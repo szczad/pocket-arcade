@@ -1,6 +1,6 @@
 # Pocket Arcade
 
-A browser arcade with Snake, Breakout, Lane Dodger, Labyrinth, Frog Crossing and Tetris. Play as a guest or sign in to keep personal bests and a theme across devices. Scores are client-reported personal records, not competitive rankings.
+A browser arcade with Snake, Breakout, Lane Dodger, Labyrinth, Frog Crossing, Tetris and Pac-Man. Play as a guest or sign in to keep personal bests and a theme across devices. Scores are client-reported personal records, not competitive rankings.
 
 ## Local development
 
@@ -17,6 +17,7 @@ Every game offers Slow, Medium, and Fast speeds in its Settings dialog; changes 
 Labyrinth's square maze size can be set from 5 to 50, with a default of 10; changes apply to the next run. Completing a maze earns 1000 points minus the number of moves, with a minimum score of 1. Personal bests are shared across maze sizes, and a score of 1 earns the Maze Explorer achievement.
 In Frog Crossing, avoid traffic and ride floating logs across the river to the far bank. Cars, road hazards and water end the run; reaching the opposite bank wins. Lanes nearer the river have denser traffic, buses, sewer work and stopped cars. Progress and crossing earn points. Choose 1–15 traffic lanes in Settings (default 5); changes apply to the next run. Personal bests are shared across lane counts, and a score of 1 earns the River Bound achievement.
 In Tetris, move pieces left or right, rotate with Up, and soft drop with Down; touch controls are also available. Each cleared line earns 100 points, and stacking pieces to the top ends the run. A score of 100 earns the Line Builder achievement.
+In Pac-Man, use the arrow keys or touch controls to navigate the maze, collect pellets and avoid ghosts. Power pellets let you eat ghosts temporarily. Collect every pellet to win; a score of 100 earns the Maze Muncher achievement.
 
 To run the local account backend, install a Docker-compatible runtime and start the Supabase stack:
 

@@ -18,6 +18,7 @@ const games: { id: GameId; name: () => string; badge: () => string; goal: number
   { id: 'labyrinth', name: () => t('Labyrinth', 'Labirynt'), badge: () => t('Maze Explorer', 'Odkrywca labiryntu'), goal: 1 },
   { id: 'frog-crossing', name: () => t('Frog Crossing', 'Żabia przeprawa'), badge: () => t('River Bound', 'Przez rzekę'), goal: 1 },
   { id: 'tetris', name: () => t('Tetris', 'Tetris'), badge: () => t('Line Builder', 'Budowniczy linii'), goal: 100 },
+  { id: 'pac-man', name: () => t('Pac-Man', 'Pac-Man'), badge: () => t('Maze Muncher', 'Pożeracz labiryntu'), goal: 100 },
 ];
 const storageKey = 'pocket-arcade.guest.v1';
 const isTheme = (value: unknown): value is Theme => value === 'midnight' || value === 'amber' || value === 'mint';
