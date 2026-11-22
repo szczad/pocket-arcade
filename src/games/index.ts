@@ -341,7 +341,7 @@ class FrogCrossing implements Game {
   score = 0;
   status: Game['status'] = 'playing';
   private readonly lanes: number;
-  private readonly traffic: { x: number; speed: number; color: string }[];
+  private readonly traffic: { x: number; speed: number; color: string; period: number; length: number; obstacle: 'none' | 'sewer' | 'stopped'; obstacleX: number }[];
   private readonly held = new Set<Action>();
   private x = 120;
   // Row zero is the river, and the final row is the starting bank.
@@ -351,11 +351,18 @@ class FrogCrossing implements Game {
   constructor(lanes: number) {
     this.lanes = Number.isFinite(lanes) ? Math.max(1, Math.min(15, Math.floor(lanes))) : 5;
     this.row = this.lanes + 1;
-    this.traffic = Array.from({ length: this.lanes }, (_, i) => ({
-      x: Math.random() * 120,
-      speed: (i % 2 === 0 ? 1 : -1) * (0.65 + (i % 3) * 0.2),
-      color: ['#ff827d', '#f5cc6d', '#8dbfe7'][i % 3],
-    }));
+    this.traffic = Array.from({ length: this.lanes }, (_, i) => {
+      const tier = Math.floor((this.lanes - 1 - i) * 4 / this.lanes);
+      return {
+        x: Math.random() * 120,
+        speed: (i % 2 === 0 ? 1 : -1) * (0.65 + (i % 3) * 0.2),
+        color: ['#ff827d', '#f5cc6d', '#8dbfe7'][i % 3],
+        period: tier === 0 ? 240 : 120,
+        length: tier >= 2 ? 60 : 40,
+        obstacle: tier === 2 ? 'sewer' as const : tier >= 3 ? 'stopped' as const : 'none' as const,
+        obstacleX: i % 2 ? 40 : 160,
+      };
+    });
   }
 
   input(action: Action, pressed: boolean): void {
@@ -383,14 +390,15 @@ class FrogCrossing implements Game {
   private checkCollision(): void {
     if (this.row > this.lanes) return;
     const lane = this.traffic[this.row - 1];
-    // Cars repeat every 120 pixels; account for their wrapped copies.
-    const offset = ((this.x - lane.x) % 120 + 120) % 120;
-    if (offset < 40 || offset > 114) this.status = 'lost';
+    const offset = ((this.x - lane.x) % lane.period + lane.period) % lane.period;
+    const obstacleWidth = lane.obstacle === 'sewer' ? 28 : 40;
+    if (offset < lane.length || offset > lane.period - 6 ||
+      (lane.obstacle !== 'none' && this.x > lane.obstacleX - 6 && this.x < lane.obstacleX + obstacleWidth + 6)) this.status = 'lost';
   }
 
   step(): void {
     if (this.status !== 'playing') return;
-    for (const lane of this.traffic) lane.x = (lane.x + lane.speed + 120) % 120;
+    for (const lane of this.traffic) lane.x = (lane.x + lane.speed + lane.period) % lane.period;
     this.checkCollision();
   }
 
@@ -410,13 +418,22 @@ class FrogCrossing implements Game {
       const top = height * (i + 1);
       if (i > 0) for (let x = 0; x < 240; x += 24) rect(ctx, '#a4a5a2', x, top, 12, 1);
       const lane = this.traffic[i];
-      for (let x = lane.x - 120; x < 240; x += 120) {
+      if (lane.obstacle === 'sewer') {
+        rect(ctx, '#eebd67', lane.obstacleX, top + height * .12, 28, Math.max(2, height * .76));
+        rect(ctx, '#24283b', lane.obstacleX + 4, top + height * .25, 20, Math.max(2, height * .5));
+        rect(ctx, '#eebd67', lane.obstacleX + 8, top + height * .3, 3, Math.max(1, height * .4));
+        rect(ctx, '#eebd67', lane.obstacleX + 17, top + height * .3, 3, Math.max(1, height * .4));
+      } else if (lane.obstacle === 'stopped') {
+        rect(ctx, '#d38b67', lane.obstacleX, top + height * .2, 40, Math.max(2, height * .6));
+        rect(ctx, '#d8e4cf', lane.obstacleX + 11, top + height * .3, 15, Math.max(1, height * .4));
+      }
+      for (let x = lane.x - lane.period; x < 240; x += lane.period) {
         const y = top + height * 0.15;
         const h = height * 0.7;
-        rect(ctx, '#1c2335', x + 4, y, 32, Math.max(2, h));
-        rect(ctx, lane.color, x, y + h * 0.15, 40, Math.max(2, h * 0.7));
-        rect(ctx, '#b7e0df', x + 11, y + h * 0.25, 15, Math.max(1, h * 0.5));
-        rect(ctx, '#ffe6a0', x + (lane.speed > 0 ? 36 : 1), y + h * 0.3, 3, Math.max(1, h * 0.35));
+        rect(ctx, '#1c2335', x + 4, y, lane.length - 8, Math.max(2, h));
+        rect(ctx, lane.color, x, y + h * 0.15, lane.length, Math.max(2, h * 0.7));
+        rect(ctx, '#b7e0df', x + 11, y + h * 0.25, lane.length - 25, Math.max(1, h * 0.5));
+        rect(ctx, '#ffe6a0', x + (lane.speed > 0 ? lane.length - 4 : 1), y + h * 0.3, 3, Math.max(1, h * 0.35));
       }
     }
     const size = Math.min(16, height * 0.8);
