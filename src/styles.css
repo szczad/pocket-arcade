@@ -12,3 +12,4 @@
 @media(max-width:400px){.game-layout.expanded .dpad{grid-template-columns:repeat(3,44px);grid-template-rows:repeat(2,44px)}}
 .game-actions{flex-wrap:wrap}
 .card-link{display:block;min-width:0;text-decoration:none}.card-link .card{height:100%}.card-link:hover .card,.card-link:focus-visible .card{border-color:var(--accent)}.card-link:hover .card-title h3{color:var(--accent)}
+.brand-logo{display:block;width:250px;height:auto;max-width:50vw}
