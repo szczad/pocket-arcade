@@ -73,7 +73,7 @@ const saveAudio = () => { try { localStorage.setItem('pocket-arcade:audio', JSON
 let visibleBests: Partial<Record<GameId, number>> = {};
 const achievementPane = document.createElement('section');
 achievementPane.className = 'achievement-pane';
-document.querySelector('.game-side')!.append(achievementPane);
+document.querySelector('.game-side')!.prepend(achievementPane);
 function renderAchievements(): void {
   achievementPane.replaceChildren();
   const items = gameId ? achievements[gameId] : undefined;
