@@ -754,7 +754,9 @@ class PacMan implements Game {
       if (ghost.respawn) continue;
       const x = ghost.position.x * 16;
       const y = ghost.position.y * 16;
-      const color = this.power > 0 ? '#626de0' : ghost.color;
+      const color = this.power > 0
+        ? (this.power <= 120 && Math.floor(this.power / 15) % 2 === 0 ? '#f6e5bd' : '#626de0')
+        : ghost.color;
       rect(ctx, color, x + 4, y + 2, 8, 2);
       rect(ctx, color, x + 2, y + 4, 12, 8);
       rect(ctx, color, x + 2, y + 12, 4, 2);
