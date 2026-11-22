@@ -30,7 +30,7 @@ npx supabase start
 npx supabase test db
 ```
 
-Copy `.env.example` to `.env.local`, and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` to the local API URL and publishable key printed by the CLI. Restart Vite after changing environment variables. Open the local email testing interface (the Inbucket/Mailpit URL printed by the CLI) to retrieve six-digit sign-in codes. The local Supabase configuration enables email signups and confirmation, and uses the templates in `supabase/templates/` for both first-time confirmation and subsequent sign-in.
+Copy `.env.example` to `.env.local`, and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` to the local API URL and publishable key printed by the CLI. Restart Vite after changing environment variables. Configure the Google provider in the local Supabase stack with a Google OAuth client and callback URL as described in the hosted setup below.
 
 For a production-like local build:
 
@@ -43,7 +43,8 @@ npm run preview -- --host 127.0.0.1
 
 Provision or select an authorized Supabase project and Vercel project before deploying. The repository does not include credentials or a deployed URL.
 
-1. In Supabase, enable email signups and confirmation. Under **Authentication → URL Configuration**, set the Site URL to the deployed app URL and add that URL to Redirect URLs. The default email templates send a sign-in link; open it on the same device to return to the app. If custom templates are available, `supabase/templates/confirmation.html` and `supabase/templates/magic_link.html` provide six-digit code templates for inline login. New free-tier projects using Supabase's default email provider cannot customize templates; custom SMTP enables customization. Configure production SMTP for public use and check the provider's rate limits.
+1. In Google Cloud, configure the OAuth consent screen and create a Web application OAuth client. Add the app's origin to its authorized JavaScript origins and add the Supabase callback URL shown in **Authentication → Providers → Google** to its authorized redirect URIs. Enable Google in Supabase and enter the client ID and secret there. Under **Authentication → URL Configuration**, set the Site URL to the deployed app URL and add that URL to Redirect URLs. For local development, configure `[auth.external.google]` in `supabase/config.toml` with the client ID and a secret sourced from an environment variable; the local callback is `http://127.0.0.1:55421/auth/v1/callback`. See the [Supabase Google sign-in guide](https://supabase.com/docs/guides/auth/social-login/auth-google).
+   Google may reject OAuth sign-in inside embedded WebViews; use a supported system browser for Google sign-in.
 2. Authenticate the Supabase CLI, then apply the migration to the intended project:
 
    ```sh

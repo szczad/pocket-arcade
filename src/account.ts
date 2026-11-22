@@ -66,9 +66,6 @@ export function createAccount(container: HTMLElement, onChange: (snapshot: Accou
   let epoch = 0;
   let disposed = false;
   let loginOpen = false;
-  let email = '';
-  let token = '';
-  let codeSent = false;
   let busy = false;
   let error: string | (() => string) = '';
   let notice: string | (() => string) = '';
@@ -119,30 +116,8 @@ export function createAccount(container: HTMLElement, onChange: (snapshot: Accou
       container.append(element('p', t('Play as a guest or log in to keep your records across devices.', 'Graj jako gość lub zaloguj się, aby zachować rekordy na różnych urządzeniach.')));
       if (!loginOpen) container.append(button(t('Log in', 'Zaloguj się'), () => { loginOpen = true; error = ''; notice = ''; update(); }));
       else {
-        const form = element('form');
-        const label = element('label', t('Email address', 'Adres e-mail'));
-        const input = element('input');
-        input.type = 'email'; input.name = 'email'; input.autocomplete = 'email'; input.required = true;
-        input.value = email; input.disabled = codeSent || busy;
-        input.addEventListener('input', () => { email = input.value; });
-        label.append(input); form.append(label);
-        if (codeSent) {
-          const codeLabel = element('label', t('Six-digit code (if provided)', 'Sześciocyfrowy kod (jeśli podano)'));
-          const code = element('input');
-          code.type = 'text'; code.name = 'token'; code.inputMode = 'numeric'; code.autocomplete = 'one-time-code';
-          code.required = true; code.pattern = '[0-9]{6}'; code.maxLength = 6; code.value = token; code.disabled = busy;
-          code.addEventListener('input', () => { token = code.value; });
-          codeLabel.append(code); form.append(codeLabel);
-        }
-        const submit = element('button', busy ? t('Please wait…', 'Proszę czekać…') : codeSent ? t('Verify code', 'Sprawdź kod') : t('Send sign-in email', 'Wyślij wiadomość logowania'));
-        submit.type = 'submit'; submit.disabled = busy; form.append(submit);
-        form.addEventListener('submit', (event) => { event.preventDefault(); void (codeSent ? verifyCode() : sendCode()); });
-        if (codeSent) {
-          form.append(button(t('Resend email', 'Wyślij wiadomość ponownie'), () => { void sendCode(); }, busy));
-          form.append(button(t('Change email', 'Zmień adres e-mail'), () => { codeSent = false; token = ''; error = ''; notice = ''; update(); }, busy));
-        }
-        form.append(button(t('Cancel', 'Anuluj'), () => { loginOpen = false; error = ''; notice = ''; update(); }, busy));
-        container.append(form);
+        container.append(button(busy ? t('Please wait…', 'Proszę czekać…') : t('Continue with Google', 'Kontynuuj przez Google'), () => { void signInWithGoogle(); }, busy));
+        container.append(button(t('Cancel', 'Anuluj'), () => { loginOpen = false; error = ''; notice = ''; update(); }, busy));
       }
     } else {
       container.append(element('p', t(`Signed in as ${session.user.email || 'player'}`, `Zalogowano jako ${session.user.email || 'gracz'}`)));
@@ -195,25 +170,19 @@ export function createAccount(container: HTMLElement, onChange: (snapshot: Accou
     if (error) { const message = element('p', typeof error === 'function' ? error() : error); message.setAttribute('role', 'alert'); container.append(message); }
   }
 
-  async function sendCode() {
+  async function signInWithGoogle() {
     if (!client || busy) return;
     busy = true; error = ''; notice = ''; update();
-    const { error: failure } = await client.auth.signInWithOtp({ email: email.trim(), options: { emailRedirectTo: `${window.location.origin}${window.location.pathname}` } });
-    if (disposed) return;
-    busy = false;
-    if (failure) error = () => t('Could not send email. Please wait before retrying if rate limited.', 'Nie udało się wysłać wiadomości. Jeśli przekroczono limit prób, odczekaj przed ponowieniem.');
-    else { codeSent = true; notice = () => t('Check your email. Open the sign-in link on this device, or enter the code if provided.', 'Sprawdź pocztę. Otwórz link logowania na tym urządzeniu lub wpisz kod, jeśli go podano.'); }
-    update();
-  }
-  async function verifyCode() {
-    if (!client || busy) return;
-    busy = true; error = ''; notice = ''; update();
-    const { data, error: failure } = await client.auth.verifyOtp({ email: email.trim(), token: token.trim(), type: 'email' });
-    if (disposed) return;
-    busy = false;
-    if (failure || !data.session) error = () => t('Could not verify code. The code may be invalid or expired.', 'Nie udało się sprawdzić kodu. Kod może być nieprawidłowy lub wygasł.');
-    else { loginOpen = false; token = ''; notice = ''; }
-    update();
+    try {
+      const { error: failure } = await client.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: `${window.location.origin}${window.location.pathname}` },
+      });
+      if (failure) error = () => t('Could not start Google sign-in. Please try again.', 'Nie udało się rozpocząć logowania przez Google. Spróbuj ponownie.');
+    } catch {
+      error = () => t('Could not start Google sign-in. Please try again.', 'Nie udało się rozpocząć logowania przez Google. Spróbuj ponownie.');
+    }
+    if (!disposed) { busy = false; update(); }
   }
   async function logout() {
     if (!client || busy) return;
