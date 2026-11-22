@@ -48,9 +48,8 @@ export function createAccount(container: HTMLElement, onChange: (snapshot: Accou
     }
   } catch { storage = null; }
 
-  const env = (import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env;
-  const url = env?.VITE_SUPABASE_URL;
-  const key = env?.VITE_SUPABASE_PUBLISHABLE_KEY;
+  const url = import.meta.env.VITE_SUPABASE_URL;
+  const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
   let client: SupabaseClient | null = null;
   if (url && key) {
     try { client = createClient(url, key); } catch { /* Guest mode remains available. */ }

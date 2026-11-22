@@ -51,7 +51,7 @@ Provision or select an authorized Supabase project and Vercel project before dep
    npx supabase db push
    ```
 
-3. In the intended Vercel project and environment, set `VITE_SUPABASE_URL` to the project API URL and `VITE_SUPABASE_PUBLISHABLE_KEY` to its public publishable key. These values are embedded in the client build. Never put a service-role key, database credentials, SMTP credentials, or other secrets in Vite environment variables.
+3. Connect the intended Supabase project using the Vercel Marketplace integration. The build reads its `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (or `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY`). For local development, `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` override those values. Only the URL and publishable key are embedded in the browser build; never expose secret keys, database credentials or SMTP credentials.
 4. Import the GitHub repository into the intended Vercel project and select its production branch. Vercel's Git integration builds and deploys that branch on each push. Alternatively, link and deploy from the CLI:
 
    ```sh
