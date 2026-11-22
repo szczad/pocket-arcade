@@ -219,7 +219,7 @@ function renderLanguage(): void {
   $<HTMLElement>('.game-title-row .eyebrow').firstChild!.textContent = t('NOW PLAYING ', 'TERAZ GRASZ ');
   text('.score-box .micro', 'SCORE', 'WYNIK');
   attr('canvas', 'aria-label', 'Game board', 'Plansza gry');
-  text('#replay', 'Replay', 'Zagraj ponownie');
+  text('#replay', 'New game', 'Nowa gra');
   text('.game-side > .eyebrow', 'HOW TO PLAY', 'JAK GRAĆ');
   $('.game-side .hint').innerHTML = t('Use arrow keys or WASD.<br>On touch, use the buttons below.', 'Użyj strzałek lub klawiszy WASD.<br>Na ekranie dotykowym użyj przycisków poniżej.');
   attr('.dpad', 'aria-label', 'Directional controls', 'Sterowanie kierunkowe');
