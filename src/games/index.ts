@@ -1,4 +1,4 @@
-export type GameId = 'snake' | 'breakout' | 'lane-dodger';
+export type GameId = 'snake' | 'breakout' | 'lane-dodger' | 'labyrinth';
 export type Action = 'up' | 'down' | 'left' | 'right';
 export type SnakeSpeed = 'slow' | 'medium' | 'fast';
 export interface Game {
@@ -224,10 +224,114 @@ class LaneDodger implements Game {
   }
 }
 
-export function createGame(id: GameId, snakeSpeed: SnakeSpeed = 'medium'): Game {
+class Labyrinth implements Game {
+  score = 0;
+  status: Game['status'] = 'playing';
+  private readonly size: number;
+  // Each bit represents an open passage: up, right, down, left.
+  private readonly passages: number[];
+  private readonly held: Action[] = [];
+  private x = 0;
+  private y = 0;
+  private moves = 0;
+  private repeatTicks = 0;
+
+  constructor(size: number) {
+    this.size = Number.isFinite(size) ? Math.max(5, Math.min(50, Math.floor(size))) : 10;
+    this.passages = Array(this.size * this.size).fill(0);
+    const visited = new Uint8Array(this.passages.length);
+    const stack = [0];
+    visited[0] = 1;
+    const directions = [
+      { dx: 0, dy: -1, bit: 1, opposite: 4 },
+      { dx: 1, dy: 0, bit: 2, opposite: 8 },
+      { dx: 0, dy: 1, bit: 4, opposite: 1 },
+      { dx: -1, dy: 0, bit: 8, opposite: 2 },
+    ];
+    while (stack.length) {
+      const current = stack[stack.length - 1];
+      const x = current % this.size;
+      const y = Math.floor(current / this.size);
+      const choices = directions.filter(({ dx, dy }) => {
+        const nx = x + dx, ny = y + dy;
+        return nx >= 0 && nx < this.size && ny >= 0 && ny < this.size && !visited[ny * this.size + nx];
+      });
+      if (!choices.length) { stack.pop(); continue; }
+      const direction = choices[Math.floor(Math.random() * choices.length)];
+      const next = (y + direction.dy) * this.size + x + direction.dx;
+      this.passages[current] |= direction.bit;
+      this.passages[next] |= direction.opposite;
+      visited[next] = 1;
+      stack.push(next);
+    }
+  }
+
+  input(action: Action, pressed: boolean): void {
+    const index = this.held.indexOf(action);
+    if (!pressed) {
+      if (index !== -1) this.held.splice(index, 1);
+      return;
+    }
+    if (index !== -1 || this.status !== 'playing') return;
+    this.held.push(action);
+    this.move(action);
+    this.repeatTicks = 8;
+  }
+
+  private move(action: Action): void {
+    const direction = {
+      up: { dx: 0, dy: -1, bit: 1 },
+      right: { dx: 1, dy: 0, bit: 2 },
+      down: { dx: 0, dy: 1, bit: 4 },
+      left: { dx: -1, dy: 0, bit: 8 },
+    }[action];
+    if (!(this.passages[this.y * this.size + this.x] & direction.bit)) return;
+    this.x += direction.dx;
+    this.y += direction.dy;
+    this.moves++;
+    if (this.x === this.size - 1 && this.y === this.size - 1) {
+      this.score = Math.max(1, 1000 - this.moves);
+      this.status = 'won';
+    }
+  }
+
+  step(): void {
+    if (this.status !== 'playing' || !this.held.length) return;
+    if (--this.repeatTicks <= 0) {
+      this.move(this.held[this.held.length - 1]);
+      this.repeatTicks = 8;
+    }
+  }
+
+  draw(ctx: CanvasRenderingContext2D): void {
+    rect(ctx, '#172c37', 0, 0, 240, 240);
+    const cell = 236 / this.size;
+    const edge = (n: number) => Math.round(2 + n * cell);
+    ctx.fillStyle = '#f5cf73';
+    ctx.fillRect(edge(this.size - 1) + 1, edge(this.size - 1) + 1,
+      Math.max(1, edge(this.size) - edge(this.size - 1) - 2),
+      Math.max(1, edge(this.size) - edge(this.size - 1) - 2));
+    ctx.fillStyle = '#a8b8bc';
+    for (let y = 0; y < this.size; y++) for (let x = 0; x < this.size; x++) {
+      const passages = this.passages[y * this.size + x];
+      const left = edge(x), top = edge(y), right = edge(x + 1), bottom = edge(y + 1);
+      if (!(passages & 1)) ctx.fillRect(left, top, right - left + 1, 1);
+      if (!(passages & 8)) ctx.fillRect(left, top, 1, bottom - top + 1);
+      if (x === this.size - 1) ctx.fillRect(right, top, 1, bottom - top + 1);
+      if (y === this.size - 1) ctx.fillRect(left, bottom, right - left + 1, 1);
+    }
+    const left = edge(this.x), top = edge(this.y);
+    ctx.fillStyle = '#86e6c4';
+    ctx.fillRect(left + 1, top + 1, Math.max(1, edge(this.x + 1) - left - 2),
+      Math.max(1, edge(this.y + 1) - top - 2));
+  }
+}
+
+export function createGame(id: GameId, snakeSpeed: SnakeSpeed = 'medium', mazeSize = 10): Game {
   switch (id) {
     case 'snake': return new Snake({ slow: 16, medium: 8, fast: 4 }[snakeSpeed]);
     case 'breakout': return new Breakout();
     case 'lane-dodger': return new LaneDodger();
+    case 'labyrinth': return new Labyrinth(mazeSize);
   }
 }

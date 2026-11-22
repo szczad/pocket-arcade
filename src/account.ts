@@ -14,6 +14,7 @@ const games: { id: GameId; name: string; badge: string; goal: number }[] = [
   { id: 'snake', name: 'Snake', badge: 'Orchard Keeper', goal: 50 },
   { id: 'breakout', name: 'Breakout', badge: 'Wall Breaker', goal: 120 },
   { id: 'lane-dodger', name: 'Lane Dodger', badge: 'Clear Road', goal: 10 },
+  { id: 'labyrinth', name: 'Labyrinth', badge: 'Maze Explorer', goal: 1 },
 ];
 const storageKey = 'pocket-arcade.guest.v1';
 const isTheme = (value: unknown): value is Theme => value === 'midnight' || value === 'amber' || value === 'mint';

@@ -1,6 +1,6 @@
 # Pocket Arcade
 
-A browser arcade with Snake, Breakout and Lane Dodger. Play as a guest or sign in to keep personal bests and a theme across devices. Scores are client-reported personal records, not competitive rankings.
+A browser arcade with Snake, Breakout, Lane Dodger and Labyrinth. Play as a guest or sign in to keep personal bests and a theme across devices. Scores are client-reported personal records, not competitive rankings.
 
 ## Local development
 
@@ -13,6 +13,7 @@ npm run dev
 
 Open the URL printed by Vite. Accounts are optional: without Supabase configuration, guest play remains available. Guest records and settings are stored on the device when browser storage is available; otherwise they last only for the current session. Account records are separate, and importing guest records requires explicit approval.
 Every game offers Slow, Medium, and Fast speeds in its Settings dialog; changes made during a run apply to the next run. Medium is the default. Personal bests are shared across speeds.
+Labyrinth's square maze size can be set from 5 to 50, with a default of 10; changes apply to the next run. Completing a maze earns 1000 points minus the number of moves, with a minimum score of 1. Personal bests are shared across maze sizes, and a score of 1 earns the Maze Explorer achievement.
 
 To run the local account backend, install a Docker-compatible runtime and start the Supabase stack:
 
